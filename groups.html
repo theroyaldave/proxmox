@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Groupes — Snapcast</title>
+<link rel="stylesheet" href="tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0a;color:#e0e0e0;font-family:system-ui,-apple-system,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:#111;border-bottom:1px solid #222;flex-shrink:0}
+.header-left{display:flex;align-items:center;gap:12px}
+.logo{color:#1db954;font-size:22px}
+h1{font-size:15px;font-weight:600;color:#e0e0e0}
+.status{display:flex;align-items:center;gap:6px;font-size:12px;color:#888}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#1db954}
+.status-dot.offline{background:#555}
+.header-right{display:flex;align-items:center;gap:8px}
+.btn{-webkit-appearance:none;appearance:none;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#ccc;cursor:pointer;font-size:12px;padding:6px 12px;display:flex;align-items:center;gap:5px;font-family:inherit;text-decoration:none}
+.btn:hover{background:#222;border-color:#444}
+.btn.primary{background:#1d9e75;border-color:#1d9e75;color:#fff}
+.btn.primary:hover{background:#188562;border-color:#188562}
+.btn.danger{background:#3d1a1a;border-color:#5a2d2d;color:#e05555}
+.btn.danger:hover{background:#4a2020}
+main{flex:1;padding:20px;max-width:900px;margin:0 auto;width:100%}
+.page-title{font-size:18px;font-weight:600;margin-bottom:6px}
+.page-subtitle{font-size:12px;color:#666;margin-bottom:24px;line-height:1.5}
+.presets-list{display:flex;flex-direction:column;gap:12px;margin-bottom:24px}
+.preset-card{background:#111;border:1px solid #222;border-radius:12px;overflow:hidden;transition:border-color .2s}
+.preset-card.modified{border-color:#2d5a45}
+.preset-header{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.preset-header:hover{background:#141414}
+.preset-name-input{background:none;border:none;color:#fff;font-size:13px;font-weight:600;font-family:inherit;flex:1;outline:none;cursor:text}
+.preset-name-input:focus{border-bottom:1px solid #2d5a45}
+.preset-id{font-size:10px;color:#444;background:#1a1a1a;padding:1px 6px;border-radius:10px}
+.preset-count{font-size:11px;color:#555}
+.preset-delete{-webkit-appearance:none;appearance:none;background:none;border:none;color:#333;cursor:pointer;padding:3px 6px;font-size:13px;border-radius:5px}
+.preset-delete:hover{color:#e05555;background:#2a1a1a}
+.preset-chevron{display:none}
+.preset-body{padding:0 14px 4px}
+.members-section{margin-bottom:10px}
+.members-title{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.members-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:5px}
+.member-item{display:flex;align-items:center;gap:7px;padding:6px 8px;background:#0f0f0f;border:1px solid #1a1a1a;border-radius:8px;cursor:pointer;transition:all .15s}
+.member-item:hover{border-color:#2a2a2a}
+.member-item.checked{background:#0d1f16;border-color:#2d5a45}
+.member-item.if-idle{background:#0f1a10;border-color:#1a3020}
+.member-check{width:14px;height:14px;border:1px solid #333;border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.member-item.checked .member-check{background:#1d9e75;border-color:#1d9e75}
+.member-item.if-idle .member-check{background:#0d5a30;border-color:#1a7a45}
+.member-check i{font-size:10px;color:#fff;display:none}
+.member-item.checked .member-check i,.member-item.if-idle .member-check i{display:block}
+.member-img{width:22px;height:22px;object-fit:contain;border-radius:3px;background:#1a1a1a;padding:1px;flex-shrink:0}
+.member-icon{font-size:13px;color:#555;flex-shrink:0}
+.member-name{font-size:11px;color:#ccc;flex:1}
+.member-badge{font-size:9px;color:#444;background:#1a1a1a;padding:1px 5px;border-radius:8px}
+.member-badge.idle{color:#0d5a30;background:#0a1f12;border:1px solid #1a3020}
+.if-idle-note{font-size:10px;color:#444;margin-top:8px;font-style:italic}
+.expand-btn{width:100%;margin-top:10px;padding:6px;background:none;border:1px dashed #222;border-radius:7px;color:#444;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-family:inherit;transition:all .15s}
+.expand-btn:hover{border-color:#333;color:#888;background:#0f0f0f}
+.add-preset-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;background:#111;border:1px dashed #2a2a2a;border-radius:12px;color:#444;cursor:pointer;font-size:12px;transition:all .15s}
+.add-preset-btn:hover{border-color:#444;color:#888;background:#141414}
+.footer-bar{position:sticky;bottom:0;background:#111;border-top:1px solid #222;padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+.footer-info{font-size:12px;color:#555}
+.footer-info.modified{color:#5dcaa5}
+.footer-actions{display:flex;gap:8px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:100}
+.modal-overlay.visible{display:flex}
+.modal{background:#161616;border:1px solid #2a2a2a;border-radius:16px;padding:24px;max-width:420px;width:90%}
+.modal-title{font-size:15px;font-weight:600;margin-bottom:8px}
+.modal-body{font-size:13px;color:#888;margin-bottom:20px;line-height:1.6}
+.modal-body strong{color:#ccc}
+.modal-input{width:100%;background:#0f0f0f;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:13px;padding:8px 10px;font-family:inherit;outline:none;margin-bottom:12px}
+.modal-input:focus{border-color:#2d5a45}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+.spinner-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:16px}
+.spinner-overlay.visible{display:flex}
+.spinner{width:40px;height:40px;border:3px solid #222;border-top-color:#1db954;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner-text{font-size:14px;color:#aaa}
+.spinner-subtext{font-size:11px;color:#555}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <i class="ti ti-stack logo"></i>
+    <div><h1>Snapcast — Gestion des groupes</h1></div>
+    <div class="status">
+      <div class="status-dot" id="status-dot"></div>
+      <span id="status-txt">connexion…</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <a href="/" class="btn"><i class="ti ti-layout-dashboard"></i> Index</a>
+    <a href="/plan.html" class="btn"><i class="ti ti-map-2"></i> Plan</a>
+  </div>
+</header>
+
+<main>
+  <div class="page-title">Groupes de diffusion</div>
+  <div class="page-subtitle">Gérez les presets de diffusion multiroom (ex. Maison, Maison + Chambres).<br>Chaque preset définit quelles enceintes reçoivent le stream quand vous le sélectionnez dans Spotify.</div>
+  <div id="presets-list" class="presets-list"></div>
+  <div class="add-preset-btn" onclick="showAddModal()"><i class="ti ti-plus"></i> Nouveau groupe</div>
+</main>
+
+<div class="footer-bar">
+  <span class="footer-info" id="footer-info">Aucune modification</span>
+  <div class="footer-actions">
+    <button class="btn" onclick="cancelChanges()"><i class="ti ti-x"></i> Annuler</button>
+    <button class="btn primary" onclick="showSaveModal()"><i class="ti ti-device-floppy"></i> Sauvegarder</button>
+  </div>
+</div>
+
+<!-- Modal confirmation sauvegarde -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal">
+    <div class="modal-title">⚠️ Confirmer la sauvegarde</div>
+    <div class="modal-body">
+      La sauvegarde va mettre à jour la configuration et <strong>redémarrer les services Spotify</strong>.<br><br>
+      Les streams en cours seront interrompus quelques secondes.
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="hideModal('modal-confirm')">Annuler</button>
+      <button class="btn primary" onclick="confirmSave()"><i class="ti ti-device-floppy"></i> Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal nouveau groupe -->
+<div class="modal-overlay" id="modal-add">
+  <div class="modal">
+    <div class="modal-title">Nouveau groupe</div>
+    <div class="modal-body">Choisissez un nom et un identifiant unique (lettres minuscules et underscores uniquement).</div>
+    <input class="modal-input" id="new-label" placeholder="Nom affiché (ex: Rez-de-chaussée)" oninput="autoId()">
+    <input class="modal-input" id="new-id" placeholder="Identifiant (ex: rdc)">
+    <div class="modal-actions">
+      <button class="btn" onclick="hideModal('modal-add')">Annuler</button>
+      <button class="btn primary" onclick="confirmAdd()"><i class="ti ti-plus"></i> Créer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Spinner -->
+<div class="spinner-overlay" id="spinner">
+  <div class="spinner"></div>
+  <div class="spinner-text">Sauvegarde en cours…</div>
+  <div class="spinner-subtext">Redémarrage des services Spotify</div>
+</div>
+
+<script>
+// Mapping variable → label + image
+const SPEAKERS = {
+  "SDJ_GROUP":        {label:"Salle de jeux (enceinte)", img:"NS510.png", type:"sony"},
+  "CUISINE_GROUP":    {label:"Cuisine (enceinte)",       img:"NS510.png", type:"sony"},
+  "ATELIER_GROUP":    {label:"Atelier (enceinte)",       img:"NS410.png", type:"sony"},
+  "FOURPAIN_GROUP":   {label:"Four à Pain (enceinte)",   img:"NS410.png", type:"sony"},
+  "PARENTS_GROUP":    {label:"Chambre Parents (enceinte)",img:"NS300.png",type:"sony"},
+  "LILIAN_GROUP":     {label:"Chambre Lilian (enceinte)",img:"NS410.png", type:"sony"},
+  "BIBLIO_GROUP":     {label:"Bibliothèque (enceinte)",  img:"NS410.png", type:"sony"},
+  "THAIS_GROUP":      {label:"Chambre Thaïs (enceinte)", img:"NS410.png", type:"sony"},
+  "RPI_CUISINE_GROUP":{label:"Cuisine (rpi)",            img:null,        type:"rpi"},
+  "RPI_SALON_GROUP":  {label:"Salon (rpi)",              img:null,        type:"rpi"},
+  "RPI_BAIN_GROUP":   {label:"Salle de Bain (rpi)",      img:null,        type:"rpi"},
+  "RPI_PARENTS_GROUP":{label:"Chambre Parents (rpi)",    img:null,        type:"rpi"},
+  "RPI_LILIAN_GROUP": {label:"Chambre Lilian (rpi)",     img:null,        type:"rpi"},
+  "RPI_THAIS_GROUP":  {label:"Chambre Thaïs (rpi)",      img:null,        type:"rpi"},
+  "ECHOHUB_GROUP":    {label:"Echo Hub",                 img:null,        type:"echo"},
+};
+
+// Ordre d'affichage
+const SPEAKER_ORDER = ["SDJ_GROUP","CUISINE_GROUP","ATELIER_GROUP","FOURPAIN_GROUP","PARENTS_GROUP","LILIAN_GROUP","BIBLIO_GROUP","THAIS_GROUP","RPI_CUISINE_GROUP","RPI_SALON_GROUP","RPI_BAIN_GROUP","RPI_PARENTS_GROUP","RPI_LILIAN_GROUP","RPI_THAIS_GROUP","ECHOHUB_GROUP"];
+
+let originalData = null;
+let currentData  = null; // {groups: [{id, label, force:[], if_idle:[]}]}
+let modified     = false;
+let expanded     = {};
+
+async function fetchData() {
+  try {
+    const r = await fetch('/stream-groups.json?_='+Date.now());
+    const data = await r.json();
+    document.getElementById('status-dot').className = 'status-dot';
+    document.getElementById('status-txt').textContent = 'connecté';
+    if (!originalData) {
+      originalData = JSON.parse(JSON.stringify(data));
+      currentData  = JSON.parse(JSON.stringify(data));
+    }
+    render();
+  } catch(e) {
+    document.getElementById('status-dot').className = 'status-dot offline';
+    document.getElementById('status-txt').textContent = 'hors ligne';
+  }
+}
+
+function render() {
+  modified = JSON.stringify(currentData) !== JSON.stringify(originalData);
+  const info = document.getElementById('footer-info');
+  info.textContent = modified ? 'Modifications non sauvegardées' : 'Aucune modification';
+  info.className = 'footer-info' + (modified ? ' modified' : '');
+
+  const list = document.getElementById('presets-list');
+  list.innerHTML = currentData.groups.map((g, gi) => {
+    const isExp = expanded[g.id] || false;
+    const totalMembers = g.force.length + g.if_idle.length;
+    const origG = (originalData.groups.find(x=>x.id===g.id));
+    const isMod = origG ? JSON.stringify(g) !== JSON.stringify(origG) : true;
+
+    const membersHtml = SPEAKER_ORDER.map(key => {
+      const sp = SPEAKERS[key];
+      const inForce   = g.force.includes(key);
+      const inIdle    = g.if_idle.includes(key);
+      const checked   = inForce || inIdle;
+
+      // Mode replié : afficher uniquement les membres actifs
+      if (!isExp && !checked) return '';
+
+      const cls = inIdle ? 'member-item if-idle' : checked ? 'member-item checked' : 'member-item';
+      const badge = inIdle ? '<span class="member-badge idle">si idle</span>' : '';
+      const icon = sp.img
+        ? `<img class="member-img" src="${sp.img}">`
+        : `<i class="ti ${sp.type==='rpi'?'ti-device-raspberry-pi':sp.type==='echo'?'ti-speakerphone':'ti-device-speaker'} member-icon"></i>`;
+      return `<div class="${cls}" onclick="${isExp ? `toggleMember(${gi},'${key}')` : ''}">
+        <div class="member-check"><i class="ti ti-check"></i></div>
+        ${icon}
+        <span class="member-name">${sp.label}</span>
+        ${badge}
+      </div>`;
+    }).join('');
+
+    const expandBtn = isExp
+      ? `<button class="expand-btn" onclick="toggleExpand('${g.id}')"><i class="ti ti-chevron-up"></i> Replier</button>`
+      : `<button class="expand-btn" onclick="toggleExpand('${g.id}')"><i class="ti ti-chevron-down"></i> Déployer pour ajouter / retirer</button>`;
+
+    return `<div class="preset-card${isMod?' modified':''}${isExp?' expanded':''}" id="preset-${g.id}">
+      <div class="preset-header" onclick="event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON'&&toggleExpand('${g.id}')">
+        <input class="preset-name-input" value="${g.label}" onclick="event.stopPropagation()" oninput="renamePreset(${gi},this.value)" placeholder="Nom du groupe">
+        <span class="preset-id">${g.id}</span>
+        <span class="preset-count">${totalMembers} membre${totalMembers>1?'s':''}</span>
+        <button class="preset-delete" onclick="event.stopPropagation();deletePreset(${gi})" title="Supprimer"><i class="ti ti-trash"></i></button>
+      </div>
+      <div class="preset-body">
+        ${totalMembers===0 && !isExp ? '<div style="font-size:11px;color:#444;font-style:italic;padding:8px 0">Aucun membre — déployez pour en ajouter</div>' : ''}
+        <div class="members-grid" style="margin-bottom:${isExp?'8px':'10px'}">${membersHtml}</div>
+        ${isExp ? '<div class="if-idle-note">Les membres en <strong style="color:#5dcaa5">vert clair</strong> sont ajoutés uniquement si inactifs (Echo Hub).</div>' : ''}
+      </div>
+      ${expandBtn}
+    </div>`;
+  }).join('');
+}
+
+function toggleExpand(id) {
+  expanded[id] = !expanded[id];
+  render();
+}
+
+function toggleMember(gi, key) {
+  const g = currentData.groups[gi];
+  const inForce = g.force.includes(key);
+  const inIdle  = g.if_idle.includes(key);
+
+  if (!inForce && !inIdle) {
+    // Pas membre → ajouter en force (sauf ECHOHUB → if_idle)
+    if (key === 'ECHOHUB_GROUP') {
+      g.if_idle.push(key);
+    } else {
+      g.force.push(key);
+    }
+  } else if (inForce) {
+    // En force → retirer
+    g.force.splice(g.force.indexOf(key), 1);
+  } else {
+    // En if_idle → retirer
+    g.if_idle.splice(g.if_idle.indexOf(key), 1);
+  }
+  render();
+}
+
+function renamePreset(gi, val) {
+  currentData.groups[gi].label = val;
+  modified = true;
+  document.getElementById('footer-info').textContent = 'Modifications non sauvegardées';
+  document.getElementById('footer-info').className = 'footer-info modified';
+}
+
+function deletePreset(gi) {
+  const g = currentData.groups[gi];
+  if (!confirm(`Supprimer le groupe "${g.label}" ?`)) return;
+  currentData.groups.splice(gi, 1);
+  render();
+}
+
+function cancelChanges() {
+  currentData  = JSON.parse(JSON.stringify(originalData));
+  expanded = {};
+  render();
+}
+
+function showSaveModal() {
+  if (!modified) return;
+  document.getElementById('modal-confirm').className = 'modal-overlay visible';
+}
+
+function hideModal(id) {
+  document.getElementById(id).className = 'modal-overlay';
+}
+
+async function confirmSave() {
+  hideModal('modal-confirm');
+  document.getElementById('spinner').className = 'spinner-overlay visible';
+  try {
+    const r = await fetch('/save-groups', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(currentData)
+    });
+    const data = await r.json();
+    document.getElementById('spinner').className = 'spinner-overlay';
+    if (data.status === 'ok') {
+      originalData = JSON.parse(JSON.stringify(currentData));
+      modified = false;
+      render();
+      alert('Sauvegardé !');
+    } else {
+      alert('Erreur: ' + data.message);
+    }
+  } catch(e) {
+    document.getElementById('spinner').className = 'spinner-overlay';
+    alert('Erreur réseau: ' + e);
+  }
+}
+
+function showAddModal() {
+  document.getElementById('new-label').value = '';
+  document.getElementById('new-id').value = '';
+  document.getElementById('modal-add').className = 'modal-overlay visible';
+}
+
+function autoId() {
+  const label = document.getElementById('new-label').value;
+  const id = label.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9]+/g,'_')
+    .replace(/^_|_$/g,'');
+  document.getElementById('new-id').value = id;
+}
+
+function confirmAdd() {
+  const label = document.getElementById('new-label').value.trim();
+  const id    = document.getElementById('new-id').value.trim();
+  if (!label || !id) { alert('Remplissez les deux champs'); return; }
+  if (currentData.groups.find(g=>g.id===id)) { alert('Cet identifiant existe déjà'); return; }
+  currentData.groups.push({id, label, force:[], if_idle:[]});
+  expanded[id] = true;
+  hideModal('modal-add');
+  render();
+}
+
+fetchData();
+</script>
+</body>
+</html>
