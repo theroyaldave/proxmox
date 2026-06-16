@@ -212,12 +212,16 @@ function render() {
       const inForce   = g.force.includes(key);
       const inIdle    = g.if_idle.includes(key);
       const checked   = inForce || inIdle;
+
+      // Mode replié : afficher uniquement les membres actifs
+      if (!isExp && !checked) return '';
+
       const cls = inIdle ? 'member-item if-idle' : checked ? 'member-item checked' : 'member-item';
       const badge = inIdle ? '<span class="member-badge idle">si idle</span>' : '';
       const icon = sp.img
         ? `<img class="member-img" src="${sp.img}">`
         : `<i class="ti ${sp.type==='rpi'?'ti-device-raspberry-pi':sp.type==='echo'?'ti-speakerphone':'ti-device-speaker'} member-icon"></i>`;
-      return `<div class="${cls}" onclick="toggleMember(${gi},'${key}')">
+      return `<div class="${cls}" onclick="${isExp ? `toggleMember(${gi},'${key}')` : ''}">
         <div class="member-check"><i class="ti ti-check"></i></div>
         ${icon}
         <span class="member-name">${sp.label}</span>
@@ -227,22 +231,21 @@ function render() {
 
     const expandBtn = isExp
       ? `<button class="expand-btn" onclick="toggleExpand('${g.id}')"><i class="ti ti-chevron-up"></i> Replier</button>`
-      : `<button class="expand-btn" onclick="toggleExpand('${g.id}')"><i class="ti ti-chevron-down"></i> Déployer pour modifier</button>`;
+      : `<button class="expand-btn" onclick="toggleExpand('${g.id}')"><i class="ti ti-chevron-down"></i> Déployer pour ajouter / retirer</button>`;
 
     return `<div class="preset-card${isMod?' modified':''}${isExp?' expanded':''}" id="preset-${g.id}">
-      <div class="preset-header" onclick="toggleExpand('${g.id}')">
+      <div class="preset-header" onclick="event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON'&&toggleExpand('${g.id}')">
         <input class="preset-name-input" value="${g.label}" onclick="event.stopPropagation()" oninput="renamePreset(${gi},this.value)" placeholder="Nom du groupe">
         <span class="preset-id">${g.id}</span>
         <span class="preset-count">${totalMembers} membre${totalMembers>1?'s':''}</span>
         <button class="preset-delete" onclick="event.stopPropagation();deletePreset(${gi})" title="Supprimer"><i class="ti ti-trash"></i></button>
-        <i class="ti ti-chevron-down preset-chevron"></i>
       </div>
-      <div class="preset-body">
+      <div class="preset-body" style="padding:0 14px ${isExp?'4px':'14px'}">
         <div class="members-section">
-          <div class="members-title">Enceintes membres</div>
+          ${!isExp && totalMembers===0 ? '<div style="font-size:11px;color:#444;font-style:italic">Aucun membre</div>' : ''}
           <div class="members-grid">${membersHtml}</div>
         </div>
-        <div class="if-idle-note">Les membres en <strong style="color:#5dcaa5">vert clair</strong> sont ajoutés uniquement si inactifs (Echo Hub).</div>
+        ${isExp ? '<div class="if-idle-note">Les membres en <strong style="color:#5dcaa5">vert clair</strong> sont ajoutés uniquement si inactifs (Echo Hub).</div>' : ''}
       </div>
       ${expandBtn}
     </div>`;
