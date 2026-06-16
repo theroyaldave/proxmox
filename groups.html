@@ -36,8 +36,7 @@ main{flex:1;padding:20px;max-width:900px;margin:0 auto;width:100%}
 .preset-count{font-size:11px;color:#555}
 .preset-delete{-webkit-appearance:none;appearance:none;background:none;border:none;color:#333;cursor:pointer;padding:3px 6px;font-size:13px;border-radius:5px}
 .preset-delete:hover{color:#e05555;background:#2a1a1a}
-.preset-chevron{font-size:14px;color:#444;transition:transform .2s;flex-shrink:0}
-.preset-card.expanded .preset-chevron{transform:rotate(180deg)}
+.preset-chevron{display:none}
 .preset-body{padding:0 14px 14px;display:none}
 .preset-card.expanded .preset-body{display:block}
 .members-section{margin-bottom:10px}
@@ -58,6 +57,8 @@ main{flex:1;padding:20px;max-width:900px;margin:0 auto;width:100%}
 .member-badge{font-size:9px;color:#444;background:#1a1a1a;padding:1px 5px;border-radius:8px}
 .member-badge.idle{color:#0d5a30;background:#0a1f12;border:1px solid #1a3020}
 .if-idle-note{font-size:10px;color:#444;margin-top:8px;font-style:italic}
+.expand-btn{width:100%;margin-top:10px;padding:6px;background:none;border:1px dashed #222;border-radius:7px;color:#444;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-family:inherit;transition:all .15s}
+.expand-btn:hover{border-color:#333;color:#888;background:#0f0f0f}
 .add-preset-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;background:#111;border:1px dashed #2a2a2a;border-radius:12px;color:#444;cursor:pointer;font-size:12px;transition:all .15s}
 .add-preset-btn:hover{border-color:#444;color:#888;background:#141414}
 .footer-bar{position:sticky;bottom:0;background:#111;border-top:1px solid #222;padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
@@ -224,6 +225,10 @@ function render() {
       </div>`;
     }).join('');
 
+    const expandBtn = isExp
+      ? `<button class="expand-btn" onclick="toggleExpand('${g.id}')"><i class="ti ti-chevron-up"></i> Replier</button>`
+      : `<button class="expand-btn" onclick="toggleExpand('${g.id}')"><i class="ti ti-chevron-down"></i> Déployer pour modifier</button>`;
+
     return `<div class="preset-card${isMod?' modified':''}${isExp?' expanded':''}" id="preset-${g.id}">
       <div class="preset-header" onclick="toggleExpand('${g.id}')">
         <input class="preset-name-input" value="${g.label}" onclick="event.stopPropagation()" oninput="renamePreset(${gi},this.value)" placeholder="Nom du groupe">
@@ -237,8 +242,9 @@ function render() {
           <div class="members-title">Enceintes membres</div>
           <div class="members-grid">${membersHtml}</div>
         </div>
-        <div class="if-idle-note">Les membres en <strong style="color:#5dcaa5">vert clair</strong> sont ajoutés uniquement si inactifs (Echo Hub). Clic long pour basculer mode.</div>
+        <div class="if-idle-note">Les membres en <strong style="color:#5dcaa5">vert clair</strong> sont ajoutés uniquement si inactifs (Echo Hub).</div>
       </div>
+      ${expandBtn}
     </div>`;
   }).join('');
 }
