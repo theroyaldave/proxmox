@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Groupes — Snapcast</title>
+<link rel="stylesheet" href="tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0a;color:#e0e0e0;font-family:system-ui,-apple-system,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:#111;border-bottom:1px solid #222;flex-shrink:0}
+.header-left{display:flex;align-items:center;gap:12px}
+.logo{color:#1db954;font-size:22px}
+h1{font-size:15px;font-weight:600;color:#e0e0e0}
+.status{display:flex;align-items:center;gap:6px;font-size:12px;color:#888}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#1db954}
+.status-dot.offline{background:#555}
+.header-right{display:flex;align-items:center;gap:8px}
+.btn{-webkit-appearance:none;appearance:none;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#ccc;cursor:pointer;font-size:12px;padding:6px 12px;display:flex;align-items:center;gap:5px;font-family:inherit;text-decoration:none}
+.btn:hover{background:#222;border-color:#444}
+.btn.primary{background:#1d9e75;border-color:#1d9e75;color:#fff}
+.btn.primary:hover{background:#188562;border-color:#188562}
+main{flex:1;padding:20px;max-width:1200px;margin:0 auto;width:100%}
+.page-title{font-size:18px;font-weight:600;margin-bottom:6px}
+.page-subtitle{font-size:12px;color:#666;margin-bottom:24px}
+.groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:24px}
+.group-card{background:#111;border:1px solid #222;border-radius:12px;padding:14px;transition:border-color .2s}
+.group-card.modified{border-color:#2d5a45}
+.group-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.group-name{font-size:13px;font-weight:600;color:#fff}
+.group-stream{font-size:10px;color:#555;margin-top:2px}
+.clients-list{display:flex;flex-direction:column;gap:5px}
+.client-item{display:flex;align-items:center;gap:8px;padding:6px 8px;background:#0f0f0f;border:1px solid #1a1a1a;border-radius:8px;cursor:pointer;transition:border-color .15s}
+.client-item:hover{border-color:#2a2a2a}
+.client-item.checked{background:#0d1f16;border-color:#2d5a45}
+.client-check{width:14px;height:14px;border:1px solid #333;border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.client-item.checked .client-check{background:#1d9e75;border-color:#1d9e75}
+.client-check i{font-size:10px;color:#fff;display:none}
+.client-item.checked .client-check i{display:block}
+.client-img{width:24px;height:24px;object-fit:contain;border-radius:3px;background:#1a1a1a;padding:1px;flex-shrink:0}
+.client-icon{font-size:14px;color:#555;flex-shrink:0}
+.client-name{font-size:11px;color:#ccc;flex:1}
+.client-type{font-size:9px;color:#444;background:#1a1a1a;padding:1px 5px;border-radius:10px}
+.client-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.expand-btn{width:100%;margin-top:8px;padding:5px;background:none;border:1px dashed #222;border-radius:7px;color:#444;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-family:inherit;transition:all .15s}
+.expand-btn:hover{border-color:#333;color:#888;background:#0f0f0f}
+.footer-bar{position:sticky;bottom:0;background:#111;border-top:1px solid #222;padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+.footer-info{font-size:12px;color:#555}
+.footer-info.modified{color:#5dcaa5}
+.footer-actions{display:flex;gap:8px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:100}
+.modal-overlay.visible{display:flex}
+.modal{background:#161616;border:1px solid #2a2a2a;border-radius:16px;padding:24px;max-width:420px;width:90%}
+.modal-title{font-size:15px;font-weight:600;margin-bottom:8px}
+.modal-body{font-size:13px;color:#888;margin-bottom:20px;line-height:1.6}
+.modal-body strong{color:#ccc}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+.spinner-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:16px}
+.spinner-overlay.visible{display:flex}
+.spinner{width:40px;height:40px;border:3px solid #222;border-top-color:#1db954;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner-text{font-size:14px;color:#aaa}
+.spinner-subtext{font-size:11px;color:#555}
+.add-group-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;background:#111;border:1px dashed #2a2a2a;border-radius:12px;color:#444;cursor:pointer;font-size:12px;transition:all .15s}
+.add-group-btn:hover{border-color:#444;color:#888;background:#141414}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <i class="ti ti-stack logo"></i>
+    <div>
+      <h1>Snapcast — Gestion des groupes</h1>
+    </div>
+    <div class="status">
+      <div class="status-dot" id="status-dot"></div>
+      <span id="status-txt">connexion…</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <a href="/" class="btn"><i class="ti ti-layout-dashboard"></i> Index</a>
+    <a href="/plan.html" class="btn"><i class="ti ti-map-2"></i> Plan</a>
+  </div>
+</header>
+
+<main>
+  <div class="page-title">Groupes Snapcast</div>
+  <div class="page-subtitle">Chaque carte affiche les membres actifs. Cliquez "Déployer" pour ajouter ou retirer des membres.</div>
+  <div id="groups-grid" class="groups-grid"></div>
+  <div class="add-group-btn" onclick="addGroup()"><i class="ti ti-plus"></i> Nouveau groupe</div>
+</main>
+
+<div class="footer-bar">
+  <span class="footer-info" id="footer-info">Aucune modification</span>
+  <div class="footer-actions">
+    <button class="btn" onclick="cancelChanges()"><i class="ti ti-x"></i> Annuler</button>
+    <button class="btn primary" onclick="showSaveModal()"><i class="ti ti-device-floppy"></i> Sauvegarder</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal">
+    <div class="modal-title">⚠️ Confirmer la sauvegarde</div>
+    <div class="modal-body">
+      La sauvegarde nécessite un <strong>redémarrage de tous les containers</strong>.<br><br>
+      Le système sera indisponible environ <strong>30 à 60 secondes</strong>.<br><br>
+      Les streams en cours seront interrompus.
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="hideModal()">Annuler</button>
+      <button class="btn primary" onclick="confirmSave()"><i class="ti ti-device-floppy"></i> Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<div class="spinner-overlay" id="spinner">
+  <div class="spinner"></div>
+  <div class="spinner-text">Redémarrage en cours…</div>
+  <div class="spinner-subtext">Le système sera disponible dans quelques secondes</div>
+</div>
+
+<script>
+const API = "/jsonrpc";
+
+const CLIENT_LABELS = {
+  "LXC01-AirplaySDJ":      "Salle de jeux (enceinte)",
+  "LXC02-AirplayCuisine":  "Cuisine (enceinte)",
+  "LXC05-AirplayAtelier":  "Atelier (enceinte)",
+  "LXC06-AirplayFouraPain":"Four à Pain (enceinte)",
+  "LXC07-AirplayParents":  "Chambre Parents (enceinte)",
+  "LXC08-AirplayLilian":   "Chambre Lilian (enceinte)",
+  "LXC09-AirplayThais":    "Chambre Thaïs (enceinte)",
+  "LXC11-AirplayBiblio":   "Bibliothèque (enceinte)",
+  "LXC04-EchoHub":         "Echo Hub",
+  "rpi-cuisine":           "Cuisine (rpi)",
+  "rpi-salon":             "Salon (rpi)",
+  "rpi-bain":              "Salle de Bain (rpi)",
+  "rpi-parents":           "Chambre Parents (rpi)",
+  "rpi-lilian":            "Chambre Lilian (rpi)",
+  "rpi-thais":             "Chambre Thaïs (rpi)",
+};
+
+const CLIENT_IMAGE = {
+  "LXC01-AirplaySDJ":      "NS510.png",
+  "LXC02-AirplayCuisine":  "NS510.png",
+  "LXC05-AirplayAtelier":  "NS410.png",
+  "LXC06-AirplayFouraPain":"NS410.png",
+  "LXC07-AirplayParents":  "NS300.png",
+  "LXC08-AirplayLilian":   "NS410.png",
+  "LXC09-AirplayThais":    "NS410.png",
+  "LXC11-AirplayBiblio":   "NS410.png",
+};
+
+const GROUP_LABELS = {
+  "016e3537-578f-b2cd-5a37-48ebc1d5a8ea":"Salle de jeux (enceinte)",
+  "3fa5da3f-8ba3-df55-feb8-c801659364f4":"Cuisine (enceinte)",
+  "ca134b93-8951-9f02-b5fd-b5060d5458f0":"Atelier (enceinte)",
+  "19bea368-d8a7-51ef-bd12-4aec3f8f6ffa":"Four à Pain (enceinte)",
+  "4310351e-aa93-5793-7707-dd021425830b":"Chambre Parents (enceinte)",
+  "6eb0e7b9-39fe-67ee-4707-2a121c6e111b":"Chambre Lilian (enceinte)",
+  "49c944c2-e3da-c460-febb-203a0741e201":"Bibliothèque (enceinte)",
+  "0cb6f6d4-de64-effa-d218-a2dbca2565bd":"Echo Hub",
+  "1efe8146-e7b4-f934-ca31-a98a221f89d6":"Cuisine (rpi)",
+  "d5f5ba1d-27dc-4bb9-08dd-0f53ce33ce71":"Salon (rpi)",
+  "a7ee841b-51eb-5b67-6de1-fba2104f0cdf":"Salle de Bain (rpi)",
+  "4595c5db-7274-97ad-e8b6-bc997d6a2bd7":"Chambre Parents (rpi)",
+  "83ca2dc2-692c-0283-f5c3-4ebfe7768279":"Chambre Lilian (rpi)",
+  "fce87803-8613-471a-218e-a83250f02558":"Chambre Thaïs (rpi)",
+  "f5a4a5bf-301d-aba2-dac6-3d7184937484":"Chambre Thaïs (enceinte)",
+};
+
+const HIDDEN_GROUPS = ["431feb53-06b1-a614-3379-e9c5a9b6b4e7","03e4b000-6918-6931-2e50-20f6af850873"];
+// Clients internes à masquer
+const HIDDEN_CLIENTS = ["LXC03-LibrespotServer"];
+
+let originalState = {};
+let currentState  = {};
+let allClients    = {}; // mac -> {name, connected}
+let groupStreams   = {};
+let expanded      = {}; // groupId -> bool
+let modified      = false;
+
+async function rpc(method, params={}) {
+  const r = await fetch(API, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id:1,jsonrpc:'2.0',method,params})});
+  return (await r.json()).result;
+}
+
+async function fetchAll() {
+  try {
+    const data = (await rpc('Server.GetStatus')).server;
+    document.getElementById('status-dot').className = 'status-dot';
+    document.getElementById('status-txt').textContent = 'connecté';
+
+    // Collecter tous les clients
+    const newClients = {};
+    data.groups.forEach(g => {
+      g.clients.forEach(c => {
+        if (!HIDDEN_CLIENTS.includes(c.host.name)) {
+          newClients[c.host.mac] = {name: c.host.name, connected: c.connected};
+        }
+      });
+    });
+    allClients = newClients;
+
+    // Construire l'état des groupes
+    const newState = {};
+    data.groups.forEach(g => {
+      if (HIDDEN_GROUPS.includes(g.id)) return;
+      newState[g.id] = g.clients
+        .map(c => c.host.mac)
+        .filter(mac => allClients[mac]);
+      groupStreams[g.id] = g.stream_id;
+    });
+
+    // Initialiser originalState une seule fois
+    if (Object.keys(originalState).length === 0) {
+      originalState = JSON.parse(JSON.stringify(newState));
+      currentState  = JSON.parse(JSON.stringify(newState));
+    }
+
+    render();
+  } catch(e) {
+    document.getElementById('status-dot').className = 'status-dot offline';
+    document.getElementById('status-txt').textContent = 'hors ligne';
+  }
+}
+
+function clientLabel(name) {
+  return CLIENT_LABELS[name] || name;
+}
+
+function isRpi(name) {
+  return name.startsWith('rpi-');
+}
+
+function render() {
+  modified = JSON.stringify(currentState) !== JSON.stringify(originalState);
+  const info = document.getElementById('footer-info');
+  info.textContent = modified ? 'Modifications non sauvegardées' : 'Aucune modification';
+  info.className = 'footer-info' + (modified ? ' modified' : '');
+
+  const grid = document.getElementById('groups-grid');
+  grid.innerHTML = Object.entries(currentState).map(([gid, macs]) => {
+    const label   = GROUP_LABELS[gid] || gid.substring(0,8)+'…';
+    const stream  = groupStreams[gid] || '';
+    const isModified = JSON.stringify(macs.slice().sort()) !== JSON.stringify((originalState[gid]||[]).slice().sort());
+    const isExpanded = expanded[gid] || false;
+
+    // Membres actifs (cochés)
+    const checkedMacs = macs;
+    // Tous les clients disponibles
+    const allMacs = Object.keys(allClients);
+
+    // Membres actifs HTML
+    const checkedHtml = checkedMacs.map(mac => {
+      const c = allClients[mac];
+      if (!c) return '';
+      const img = CLIENT_IMAGE[c.name];
+      return `<div class="client-item checked" onclick="toggleClient('${gid}','${mac}')">
+        <div class="client-check"><i class="ti ti-check"></i></div>
+        ${img ? `<img class="client-img" src="${img}">` : `<i class="ti ${isRpi(c.name)?'ti-device-raspberry-pi':'ti-device-speaker'} client-icon"></i>`}
+        <span class="client-name">${clientLabel(c.name)}</span>
+        <span class="client-type">${isRpi(c.name)?'RPi':'LXC'}</span>
+        <div class="client-dot" style="background:${c.connected?'#1db954':'#333'}"></div>
+      </div>`;
+    }).join('');
+
+    // Membres non actifs HTML (uniquement si déployé)
+    const uncheckedHtml = isExpanded ? allMacs
+      .filter(mac => !checkedMacs.includes(mac))
+      .map(mac => {
+        const c = allClients[mac];
+        const img = CLIENT_IMAGE[c.name];
+        return `<div class="client-item" onclick="toggleClient('${gid}','${mac}')">
+          <div class="client-check"><i class="ti ti-check"></i></div>
+          ${img ? `<img class="client-img" src="${img}">` : `<i class="ti ${isRpi(c.name)?'ti-device-raspberry-pi':'ti-device-speaker'} client-icon"></i>`}
+          <span class="client-name">${clientLabel(c.name)}</span>
+          <span class="client-type">${isRpi(c.name)?'RPi':'LXC'}</span>
+          <div class="client-dot" style="background:${c.connected?'#1db954':'#333'}"></div>
+        </div>`;
+      }).join('') : '';
+
+    const expandLabel = isExpanded
+      ? '<i class="ti ti-chevron-up"></i> Replier'
+      : '<i class="ti ti-chevron-down"></i> Déployer pour ajouter';
+
+    return `<div class="group-card${isModified?' modified':''}" id="group-${gid}">
+      <div class="group-header">
+        <div>
+          <div class="group-name">${label}</div>
+          <div class="group-stream">stream: ${stream}</div>
+        </div>
+        <span style="font-size:10px;color:#444">${checkedMacs.length} membre${checkedMacs.length>1?'s':''}</span>
+      </div>
+      <div class="clients-list">
+        ${checkedHtml}
+        ${uncheckedHtml}
+      </div>
+      <button class="expand-btn" onclick="toggleExpand('${gid}')">${expandLabel}</button>
+    </div>`;
+  }).join('');
+}
+
+function toggleExpand(gid) {
+  expanded[gid] = !expanded[gid];
+  render();
+}
+
+function toggleClient(gid, mac) {
+  const macs = currentState[gid];
+  const idx  = macs.indexOf(mac);
+  if (idx >= 0) {
+    // Retirer
+    currentState[gid].splice(idx, 1);
+  } else {
+    // Retirer de l'ancien groupe
+    Object.keys(currentState).forEach(g => {
+      const i = currentState[g].indexOf(mac);
+      if (i >= 0) currentState[g].splice(i, 1);
+    });
+    currentState[gid].push(mac);
+  }
+  render();
+}
+
+function cancelChanges() {
+  currentState = JSON.parse(JSON.stringify(originalState));
+  expanded = {};
+  modified = false;
+  render();
+}
+
+function showSaveModal() {
+  if (!modified) return;
+  document.getElementById('modal-confirm').className = 'modal-overlay visible';
+}
+
+function hideModal() {
+  document.getElementById('modal-confirm').className = 'modal-overlay';
+}
+
+async function confirmSave() {
+  hideModal();
+  document.getElementById('spinner').className = 'spinner-overlay visible';
+  try {
+    await fetch('/save-groups', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(currentState)
+    });
+  } catch(e) {}
+  setTimeout(pollUntilBack, 6000);
+}
+
+function pollUntilBack() {
+  fetch(API, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id:1,jsonrpc:'2.0',method:'Server.GetStatus',params:{}})})
+    .then(() => { window.location.href = '/'; })
+    .catch(() => { setTimeout(pollUntilBack, 3000); });
+}
+
+function addGroup() {
+  alert('Fonctionnalité à venir — création de nouveau groupe');
+}
+
+fetchAll();
+setInterval(fetchAll, 8000);
+</script>
+</body>
+</html>
