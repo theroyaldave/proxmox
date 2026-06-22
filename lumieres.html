@@ -8,6 +8,8 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#0a0a0a;color:#e0e0e0;font-family:system-ui,-apple-system,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+
+/* HEADER */
 header{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:#111;border-bottom:1px solid #222;flex-shrink:0}
 .header-left{display:flex;align-items:center;gap:12px}
 .logo{color:#f5a623;font-size:22px}
@@ -18,46 +20,112 @@ h1{font-size:15px;font-weight:600;color:#e0e0e0}
 .header-right{display:flex;align-items:center;gap:8px}
 .btn{-webkit-appearance:none;appearance:none;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#ccc;cursor:pointer;font-size:12px;padding:6px 12px;display:flex;align-items:center;gap:5px;font-family:inherit;text-decoration:none}
 .btn:hover{background:#222;border-color:#444}
+
+/* MAIN */
 main{flex:1;padding:20px;max-width:1100px;margin:0 auto;width:100%}
-.section{margin-bottom:28px}
-.section-title{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+.section{margin-bottom:32px}
+.section-title{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
 
-/* Scénarios connus */
-.scenes-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
-.scene-chip{display:flex;align-items:center;gap:8px;padding:6px 10px;background:#111;border:1px solid #222;border-radius:10px;font-size:11px;color:#ccc}
-.scene-chip.dynamic{border-color:#1a3a2a}
-.color-dots{display:flex;gap:3px}
-.color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.color-dot.empty{background:#2a2a2a}
-.scene-name{font-size:11px;font-weight:500}
-.scene-badge{font-size:9px;padding:1px 5px;border-radius:8px;background:#1a3a2a;color:#5dcaa5;margin-left:2px}
+/* SCÉNARIOS — grandes cartes style Hue */
+.scenes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.scene-card{
+  position:relative;border-radius:14px;overflow:hidden;
+  aspect-ratio:16/10;cursor:default;
+  background:#1a1a1a;
+}
+.scene-card-img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform .3s ease;
+}
+.scene-card:hover .scene-card-img{transform:scale(1.04)}
+.scene-card-gradient{
+  width:100%;height:100%;
+}
+.scene-card-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top, rgba(0,0,0,.75) 0%, rgba(0,0,0,.1) 55%, transparent 100%);
+}
+.scene-card-bottom{
+  position:absolute;bottom:0;left:0;right:0;padding:8px 10px;
+  display:flex;align-items:flex-end;justify-content:space-between;gap:6px;
+}
+.scene-card-name{
+  font-size:12px;font-weight:600;color:#fff;
+  text-shadow:0 1px 4px rgba(0,0,0,.8);
+  line-height:1.2;flex:1;
+}
+.scene-card-dots{
+  display:flex;gap:3px;align-items:center;flex-shrink:0;
+}
+.scene-card-dot{
+  width:11px;height:11px;border-radius:50%;
+  border:1.5px solid rgba(255,255,255,.25);
+  flex-shrink:0;
+}
+.scene-card-badge{
+  position:absolute;top:7px;right:7px;
+  font-size:9px;padding:2px 6px;border-radius:8px;
+  background:rgba(29,158,117,.85);color:#fff;
+  backdrop-filter:blur(4px);font-weight:600;
+}
 
-/* Pièces */
-.rooms-list{display:flex;flex-direction:column;gap:12px}
+/* PIÈCES */
+.rooms-list{display:flex;flex-direction:column;gap:10px}
 .room-card{background:#111;border:1px solid #222;border-radius:12px;overflow:hidden}
 .room-card.modified{border-color:#2d5a45}
-.room-header{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.room-header{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none}
 .room-header:hover{background:#141414}
 .room-name{font-size:13px;font-weight:600;color:#fff;flex:1}
-.room-toggle{-webkit-appearance:none;appearance:none;width:36px;height:20px;background:#1a1a1a;border:1px solid #333;border-radius:10px;cursor:pointer;position:relative;flex-shrink:0;transition:all .2s}
+.room-toggle{
+  -webkit-appearance:none;appearance:none;
+  width:36px;height:20px;background:#1a1a1a;
+  border:1px solid #333;border-radius:10px;
+  cursor:pointer;position:relative;flex-shrink:0;transition:all .2s
+}
 .room-toggle.on{background:#1d9e75;border-color:#1d9e75}
-.room-toggle::after{content:'';position:absolute;width:14px;height:14px;background:#fff;border-radius:50%;top:2px;left:2px;transition:left .2s}
+.room-toggle::after{
+  content:'';position:absolute;
+  width:14px;height:14px;background:#fff;
+  border-radius:50%;top:2px;left:2px;transition:left .2s
+}
 .room-toggle.on::after{left:18px}
 .room-body{padding:0 14px 14px;display:none}
 .room-card.expanded .room-body{display:block}
 .chevron{font-size:13px;color:#444;transition:transform .2s}
 .room-card.expanded .chevron{transform:rotate(180deg)}
 
-/* Styles musicaux */
-.styles-grid{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+/* STYLES MUSICAUX */
+.styles-grid{display:flex;flex-direction:column;gap:6px;margin-top:10px}
 .style-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:#0f0f0f;border:1px solid #1a1a1a;border-radius:8px}
 .style-label{font-size:11px;color:#888;width:100px;flex-shrink:0}
 .style-scenes{display:flex;gap:6px;flex:1;flex-wrap:wrap}
-.scene-select{-webkit-appearance:none;appearance:none;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:7px;color:#ccc;font-size:11px;padding:4px 8px;font-family:inherit;cursor:pointer;flex:1;min-width:120px}
-.scene-select:focus{outline:none;border-color:#2d5a45}
-.scene-preview{display:flex;gap:2px;align-items:center;flex-shrink:0}
 
-/* Footer */
+/* SELECT avec preview */
+.scene-select-wrap{
+  position:relative;flex:1;min-width:130px;
+  display:flex;align-items:center;gap:5px;
+  background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;
+  padding:3px 6px;cursor:pointer;
+  transition:border-color .15s;
+}
+.scene-select-wrap:focus-within{border-color:#2d5a45}
+.scene-select-wrap:hover{border-color:#333}
+.select-thumb{
+  width:28px;height:18px;border-radius:5px;
+  object-fit:cover;flex-shrink:0;background:#2a2a2a;
+}
+.select-thumb-gradient{
+  width:28px;height:18px;border-radius:5px;flex-shrink:0;
+}
+.scene-select{
+  -webkit-appearance:none;appearance:none;
+  background:transparent;border:none;
+  color:#ccc;font-size:11px;padding:2px 2px;
+  font-family:inherit;cursor:pointer;flex:1;
+  outline:none;
+}
+
+/* FOOTER */
 .footer-bar{position:sticky;bottom:0;background:#111;border-top:1px solid #222;padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
 .footer-info{font-size:12px;color:#555}
 .footer-info.modified{color:#5dcaa5}
@@ -65,7 +133,7 @@ main{flex:1;padding:20px;max-width:1100px;margin:0 auto;width:100%}
 .btn.primary{background:#1d9e75;border-color:#1d9e75;color:#fff}
 .btn.primary:hover{background:#188562}
 
-/* Modal */
+/* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:100}
 .modal-overlay.visible{display:flex}
 .modal{background:#161616;border:1px solid #2a2a2a;border-radius:16px;padding:24px;max-width:440px;width:90%}
@@ -74,17 +142,20 @@ main{flex:1;padding:20px;max-width:1100px;margin:0 auto;width:100%}
 .modal-body strong{color:#ccc}
 .modal-actions{display:flex;gap:8px;justify-content:flex-end}
 
-/* Toast */
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#161616;border:1px solid #2d5a45;border-radius:12px;padding:12px 20px;font-size:13px;color:#5dcaa5;z-index:300;display:none;align-items:center;gap:8px}
+/* TOAST */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#161616;border:1px solid #2d5a45;border-radius:12px;padding:12px 20px;font-size:13px;color:#5dcaa5;z-index:300;display:none;align-items:center;gap:8px;white-space:nowrap}
 .toast.visible{display:flex}
 .toast.error{border-color:#5a2d2d;color:#e05555}
 
-/* Spinner */
+/* SPINNER */
 .spinner-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:16px}
 .spinner-overlay.visible{display:flex}
 .spinner{width:40px;height:40px;border:3px solid #222;border-top-color:#f5a623;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spinner-text{font-size:14px;color:#aaa}
+
+/* Désactivée */
+.room-disabled-msg{font-size:11px;color:#444;padding:8px 0;font-style:italic}
 </style>
 </head>
 <body>
@@ -105,10 +176,10 @@ main{flex:1;padding:20px;max-width:1100px;margin:0 auto;width:100%}
 </header>
 
 <main>
-  <!-- Scénarios connus -->
+  <!-- Scénarios disponibles -->
   <div class="section">
     <div class="section-title">Scénarios disponibles</div>
-    <div id="scenes-list" class="scenes-grid"></div>
+    <div id="scenes-grid" class="scenes-grid"></div>
   </div>
 
   <!-- Pièces -->
@@ -130,7 +201,7 @@ main{flex:1;padding:20px;max-width:1100px;margin:0 auto;width:100%}
   <div class="modal">
     <div class="modal-title">Confirmer la sauvegarde</div>
     <div class="modal-body">
-      La sauvegarde va <strong>créer les scénarios manquants</strong> sur le bridge Hue pour chaque pièce et mettre à jour la configuration.<br><br>
+      La sauvegarde va <strong>créer les scénarios manquants</strong> sur le bridge Hue pour chaque pièce activée et mettre à jour la configuration.<br><br>
       Cette opération peut prendre quelques secondes.
     </div>
     <div class="modal-actions">
@@ -152,10 +223,54 @@ let originalConfig = null;
 let currentConfig  = null;
 let modified = false;
 let expanded = {};
-
-// Scènes disponibles dans le système (référence Atelier)
-// Récupérées depuis hue-config.json known_scenes
 let knownScenes = [];
+let imageCache = {}; // nom scène → url image ou null
+
+// Mapping nom scène → nom fichier image
+const SCENE_IMAGE_MAP = {
+  "Aurore boréale":               "Aurore_boreale.jpg",
+  "Champignon des bois":          "Champignon_des_bois.jpg",
+  "Chinatown":                    "Chinatown.jpg",
+  "Coucher de soleil sur la savane": "Coucher_de_soleil.jpg",
+  "Détente":                      "Detente.jpg",
+  "Éclosion ambrée":              "Eclosion_ambree.jpg",
+  "Étang doré":                   "Etang_dore.jpg",
+  "Honolulu":                     "Honolulu.jpg",
+  "Ibiza":                        "Ibiza.jpg",
+  "Lecture":                      "Lecture.jpg",
+  "Lumineux":                     "Lumineux.jpg",
+  "Magnéto":                      "Magneto.jpg",
+  "Malibu pink":                  "Malibu_pink.jpg",
+  "Miami":                        "Miami.jpg",
+  "Rio":                          "Rio.jpg",
+  "Rougegorge d'automne":         "Rouge_gorge.jpg",
+  "Soho":                         "Soho.jpg",
+  "Sommeil":                      "Sommeil.jpg",
+  "Starlight":                    "Starlight.jpg",
+  "Tokyo":                        "Tokyo.jpg",
+  "Ville de l'amour":             "Ville_de_lamour.jpg",
+  "Concentration":                "Concentration.jpg",
+  "Veilleuse":                    "Veilleuse.jpg"
+};
+
+function sceneImageUrl(name) {
+  const file = SCENE_IMAGE_MAP[name];
+  return file ? `/hue-scenes/${file}` : null;
+}
+
+function renderColorDots(colors, small=false) {
+  if (!colors || !colors.length) return '';
+  const size = small ? '8px' : '11px';
+  return colors.map(c =>
+    `<div class="scene-card-dot" style="width:${size};height:${size};background:${c}"></div>`
+  ).join('');
+}
+
+function colorGradient(colors) {
+  if (!colors || !colors.length) return '#1a1a1a';
+  if (colors.length === 1) return colors[0];
+  return `linear-gradient(135deg, ${colors.join(', ')})`;
+}
 
 async function loadConfig() {
   try {
@@ -177,11 +292,38 @@ function getSceneInfo(name) {
   return knownScenes.find(s => s.name === name) || {name, mode:'active', colors:[]};
 }
 
-function renderColorDots(colors) {
-  if (!colors || !colors.length) {
-    return '<div class="color-dot empty"></div>'.repeat(3);
+function renderSceneCard(scene) {
+  const imgUrl = sceneImageUrl(scene.name);
+  const isDynamic = scene.mode === 'dynamic_palette';
+  const dotsHtml = renderColorDots(scene.colors);
+
+  let mediaHtml;
+  if (imgUrl) {
+    mediaHtml = `<img class="scene-card-img" src="${imgUrl}" alt="${scene.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:${colorGradient(scene.colors)}"></div>`;
+  } else {
+    mediaHtml = `<div class="scene-card-gradient" style="background:${colorGradient(scene.colors)}"></div>`;
   }
-  return colors.map(c => `<div class="color-dot" style="background:${c}"></div>`).join('');
+
+  return `<div class="scene-card">
+    ${mediaHtml}
+    <div class="scene-card-overlay"></div>
+    ${isDynamic ? '<span class="scene-card-badge">dynamique</span>' : ''}
+    <div class="scene-card-bottom">
+      <span class="scene-card-name">${scene.name}</span>
+      <div class="scene-card-dots">${dotsHtml}</div>
+    </div>
+  </div>`;
+}
+
+function renderSelectThumb(sceneName) {
+  const imgUrl = sceneImageUrl(sceneName);
+  const info = getSceneInfo(sceneName);
+  if (imgUrl) {
+    return `<img class="select-thumb" src="${imgUrl}" alt="" onerror="this.style.display='none'">`;
+  }
+  const grad = colorGradient(info.colors);
+  return `<div class="select-thumb-gradient" style="background:${grad}"></div>`;
 }
 
 function render() {
@@ -190,58 +332,66 @@ function render() {
   info.textContent = modified ? 'Modifications non sauvegardées' : 'Aucune modification';
   info.className = 'footer-info' + (modified ? ' modified' : '');
 
-  // Scénarios connus
-  const scenesList = document.getElementById('scenes-list');
-  scenesList.innerHTML = knownScenes.map(s => {
-    const isDynamic = s.mode === 'dynamic_palette';
-    return `<div class="scene-chip${isDynamic?' dynamic':''}">
-      <div class="color-dots">${renderColorDots(s.colors)}</div>
-      <span class="scene-name">${s.name}</span>
-      ${isDynamic ? '<span class="scene-badge">dynamique</span>' : ''}
-    </div>`;
-  }).join('');
+  // Grille scénarios
+  document.getElementById('scenes-grid').innerHTML =
+    knownScenes.map(s => renderSceneCard(s)).join('');
 
   // Pièces
-  const roomsList = document.getElementById('rooms-list');
-  roomsList.innerHTML = Object.entries(currentConfig.rooms).map(([roomName, roomCfg], ri) => {
-    const isExp = expanded[roomName] || false;
-    const isEnabled = roomCfg.enabled !== false;
-    const isModified = JSON.stringify(roomCfg) !== JSON.stringify(originalConfig.rooms[roomName]);
+  document.getElementById('rooms-list').innerHTML =
+    Object.entries(currentConfig.rooms).map(([roomName, roomCfg]) => {
+      const isExp = !!expanded[roomName];
+      const isEnabled = roomCfg.enabled !== false;
+      const isModified = JSON.stringify(roomCfg) !== JSON.stringify(originalConfig.rooms[roomName]);
 
-    const stylesHtml = currentConfig.styles.map((style, si) => {
-      const sceneSelects = [0,1,2].map(idx => {
-        const currentScene = (roomCfg.scenes && roomCfg.scenes[style.id] && roomCfg.scenes[style.id][idx]) || style.scenes[idx] || '';
-        const sceneInfo = getSceneInfo(currentScene);
-        const options = knownScenes.map(s =>
-          `<option value="${s.name}" ${s.name===currentScene?'selected':''}>${s.name}</option>`
-        ).join('');
-        const dots = renderColorDots(sceneInfo.colors);
-        return `<div style="display:flex;align-items:center;gap:4px;flex:1">
-          <div class="color-dots" style="flex-shrink:0">${dots}</div>
-          <select class="scene-select" onchange="setScene('${roomName}','${style.id}',${idx},this.value)">
-            ${options}
-          </select>
-        </div>`;
-      }).join('');
+      let bodyContent = '';
+      if (!isEnabled) {
+        bodyContent = `<div class="room-disabled-msg">Pièce désactivée — les lumières ne seront pas contrôlées.</div>`;
+      } else {
+        const stylesHtml = currentConfig.styles.map(style => {
+          const roomScenes = (roomCfg.scenes && roomCfg.scenes[style.id])
+            ? roomCfg.scenes[style.id]
+            : style.scenes;
 
-      return `<div class="style-row">
-        <span class="style-label">${style.label}</span>
-        <div class="style-scenes">${sceneSelects}</div>
+          const selects = [0,1,2].map(idx => {
+            const cur = roomScenes[idx] || style.scenes[idx] || 'Lumineux';
+            const opts = knownScenes.map(s =>
+              `<option value="${s.name}"${s.name===cur?' selected':''}>${s.name}</option>`
+            ).join('');
+            return `<div class="scene-select-wrap">
+              ${renderSelectThumb(cur)}
+              <select class="scene-select" onchange="setScene('${roomName}','${style.id}',${idx},this.value);updateThumb(this)">
+                ${opts}
+              </select>
+            </div>`;
+          }).join('');
+
+          return `<div class="style-row">
+            <span class="style-label">${style.label}</span>
+            <div class="style-scenes">${selects}</div>
+          </div>`;
+        }).join('');
+        bodyContent = `<div class="styles-grid">${stylesHtml}</div>`;
+      }
+
+      return `<div class="room-card${isModified?' modified':''}${isExp?' expanded':''}">
+        <div class="room-header" onclick="toggleRoom('${roomName}')">
+          <i class="ti ti-device-speaker" style="font-size:14px;color:#555"></i>
+          <span class="room-name">${roomName}</span>
+          <button class="room-toggle${isEnabled?' on':''}" onclick="event.stopPropagation();toggleEnabled('${roomName}')" title="${isEnabled?'Désactiver':'Activer'}"></button>
+          <i class="ti ti-chevron-down chevron"></i>
+        </div>
+        <div class="room-body">${bodyContent}</div>
       </div>`;
     }).join('');
+}
 
-    return `<div class="room-card${isModified?' modified':''}${isExp?' expanded':''}" id="room-${ri}">
-      <div class="room-header" onclick="toggleRoom('${roomName}')">
-        <i class="ti ti-device-speaker" style="font-size:14px;color:#555"></i>
-        <span class="room-name">${roomName}</span>
-        <button class="room-toggle${isEnabled?' on':''}" onclick="event.stopPropagation();toggleEnabled('${roomName}')" title="${isEnabled?'Désactiver':'Activer'}"></button>
-        <i class="ti ti-chevron-down chevron"></i>
-      </div>
-      <div class="room-body">
-        ${isEnabled ? `<div class="styles-grid">${stylesHtml}</div>` : '<div style="font-size:11px;color:#444;padding:8px 0;font-style:italic">Pièce désactivée — les lumières ne seront pas contrôlées.</div>'}
-      </div>
-    </div>`;
-  }).join('');
+// Met à jour la vignette du select sans re-render complet
+function updateThumb(selectEl) {
+  const wrap = selectEl.closest('.scene-select-wrap');
+  const name = selectEl.value;
+  const thumb = wrap.querySelector('.select-thumb, .select-thumb-gradient');
+  if (thumb) thumb.remove();
+  wrap.insertAdjacentHTML('afterbegin', renderSelectThumb(name));
 }
 
 function toggleRoom(roomName) {
@@ -250,25 +400,21 @@ function toggleRoom(roomName) {
 }
 
 function toggleEnabled(roomName) {
-  currentConfig.rooms[roomName].enabled = !currentConfig.rooms[roomName].enabled;
+  currentConfig.rooms[roomName].enabled = !(currentConfig.rooms[roomName].enabled !== false);
   render();
 }
 
 function setScene(roomName, styleId, idx, sceneName) {
   if (!currentConfig.rooms[roomName].scenes) currentConfig.rooms[roomName].scenes = {};
   if (!currentConfig.rooms[roomName].scenes[styleId]) {
-    // Initialiser avec les scènes par défaut du style
     const style = currentConfig.styles.find(s => s.id === styleId);
     currentConfig.rooms[roomName].scenes[styleId] = [...(style ? style.scenes : ['Lumineux','Lumineux','Lumineux'])];
   }
   currentConfig.rooms[roomName].scenes[styleId][idx] = sceneName;
   modified = true;
-  // Mettre à jour juste le footer
   const info = document.getElementById('footer-info');
   info.textContent = 'Modifications non sauvegardées';
   info.className = 'footer-info modified';
-  // Re-render les dots de preview
-  render();
 }
 
 function cancelChanges() {
@@ -290,12 +436,11 @@ async function confirmSave() {
   hideModal();
   document.getElementById('spinner').className = 'spinner-overlay visible';
   document.getElementById('spinner-text').textContent = 'Création des scénarios manquants…';
-
   try {
     const r = await fetch('/save-hue-config', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(currentConfig)
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(currentConfig)
     });
     const data = await r.json();
     document.getElementById('spinner').className = 'spinner-overlay';
@@ -303,9 +448,10 @@ async function confirmSave() {
       originalConfig = JSON.parse(JSON.stringify(currentConfig));
       modified = false;
       render();
-      showToast('Configuration sauvegardée !');
+      const nb = data.created ? data.created.length : 0;
+      showToast(nb > 0 ? `Sauvegardé — ${nb} scénario(s) créé(s)` : 'Configuration sauvegardée');
     } else {
-      showToast('Erreur: ' + data.message, true);
+      showToast('Erreur : ' + data.message, true);
     }
   } catch(e) {
     document.getElementById('spinner').className = 'spinner-overlay';
@@ -317,7 +463,7 @@ function showToast(msg, isError=false) {
   const t = document.getElementById('toast');
   document.getElementById('toast-msg').textContent = msg;
   t.className = 'toast visible' + (isError ? ' error' : '');
-  setTimeout(() => { t.className = 'toast'; }, 3000);
+  setTimeout(() => { t.className = 'toast'; }, 3500);
 }
 
 loadConfig();
