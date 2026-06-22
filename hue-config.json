@@ -29,54 +29,14 @@
     }
   },
   "styles": [
-    {
-      "id": "energique",
-      "label": "Énergique",
-      "conditions": [{"param": "energy", "op": ">", "value": 0.75}],
-      "scenes": ["Ibiza", "Magnéto", "Tokyo"]
-    },
-    {
-      "id": "dansant",
-      "label": "Dansant",
-      "conditions": [{"param": "danceability", "op": ">", "value": 0.7}, {"param": "energy", "op": ">", "value": 0.5}],
-      "scenes": ["Miami", "Rio", "Malibu pink"]
-    },
-    {
-      "id": "calme",
-      "label": "Calme",
-      "conditions": [{"param": "energy", "op": "<", "value": 0.35}],
-      "scenes": ["Sommeil", "Détente", "Starlight"]
-    },
-    {
-      "id": "acoustique",
-      "label": "Acoustique",
-      "conditions": [{"param": "acousticness", "op": ">", "value": 0.6}, {"param": "energy", "op": "<", "value": 0.6}],
-      "scenes": ["Étang doré", "Rougegorge d'automne", "Champignon des bois"]
-    },
-    {
-      "id": "festif",
-      "label": "Festif",
-      "conditions": [{"param": "valence", "op": ">", "value": 0.7}, {"param": "energy", "op": ">", "value": 0.6}],
-      "scenes": ["Soho", "Ville de l'amour", "Chinatown"]
-    },
-    {
-      "id": "melancolique",
-      "label": "Mélancolique",
-      "conditions": [{"param": "valence", "op": "<", "value": 0.35}, {"param": "energy", "op": "<", "value": 0.5}],
-      "scenes": ["Aurore boréale", "Starlight", "Sommeil"]
-    },
-    {
-      "id": "instrumental",
-      "label": "Instrumental",
-      "conditions": [{"param": "instrumentalness", "op": ">", "value": 0.5}],
-      "scenes": ["Concentration", "Détente", "Lecture"]
-    },
-    {
-      "id": "defaut",
-      "label": "Par défaut",
-      "conditions": [],
-      "scenes": ["Lumineux", "Lumineux", "Lumineux"]
-    }
+    {"id": "energique", "label": "Énergique", "conditions": [{"param": "energy", "op": ">", "value": 0.75}], "scenes": ["Ibiza", "Magnéto", "Tokyo"]},
+    {"id": "dansant", "label": "Dansant", "conditions": [{"param": "danceability", "op": ">", "value": 0.7}, {"param": "energy", "op": ">", "value": 0.5}], "scenes": ["Miami", "Rio", "Malibu pink"]},
+    {"id": "calme", "label": "Calme", "conditions": [{"param": "energy", "op": "<", "value": 0.35}], "scenes": ["Sommeil", "Détente", "Starlight"]},
+    {"id": "acoustique", "label": "Acoustique", "conditions": [{"param": "acousticness", "op": ">", "value": 0.6}, {"param": "energy", "op": "<", "value": 0.6}], "scenes": ["Étang doré", "Rougegorge d'automne", "Champignon des bois"]},
+    {"id": "festif", "label": "Festif", "conditions": [{"param": "valence", "op": ">", "value": 0.7}, {"param": "energy", "op": ">", "value": 0.6}], "scenes": ["Soho", "Ville de l'amour", "Chinatown"]},
+    {"id": "melancolique", "label": "Mélancolique", "conditions": [{"param": "valence", "op": "<", "value": 0.35}, {"param": "energy", "op": "<", "value": 0.5}], "scenes": ["Aurore boréale", "Starlight", "Sommeil"]},
+    {"id": "instrumental", "label": "Instrumental", "conditions": [{"param": "instrumentalness", "op": ">", "value": 0.5}], "scenes": ["Concentration", "Détente", "Lecture"]},
+    {"id": "defaut", "label": "Par défaut", "conditions": [], "scenes": ["Lumineux", "Lumineux", "Lumineux"]}
   ],
   "known_scenes": [
     {"name": "Aurore boréale", "mode": "dynamic_palette", "colors": ["#0e5a2b","#1b533b","#0d565a","#0e47ff","#182dff"]},
@@ -101,6 +61,7 @@
     {"name": "Tokyo", "mode": "dynamic_palette", "colors": ["#9801ff","#1487ff","#ff04ff","#ff0746","#e55103"]},
     {"name": "Ville de l'amour", "mode": "dynamic_palette", "colors": ["#4f00ff","#2658ff","#0f89ff","#ff3d07","#c25805"]},
     {"name": "Concentration", "mode": "active", "colors": []},
-    {"name": "Veilleuse", "mode": "active", "colors": []}
+    {"name": "Veilleuse", "mode": "active", "colors": []},
+    {"name": "Suzuka", "mode": "active", "colors": ["#8838ff","#ed79ff","#ff7cb2","#ffa9a4","#ddd26c"]}
   ]
 }
