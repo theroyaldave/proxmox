@@ -1,0 +1,106 @@
+{
+  "bridge": "192.168.2.70",
+  "token": "NqTWScJIlAHiwumno8qS8QodlUXYXHttDNsZiO-s",
+  "source_room_id": "2c0ad668-c4d4-4d9b-95da-2cebc9142c33",
+  "rooms": {
+    "Atelier (enceinte)": {
+      "hue_room_id": "2c0ad668-c4d4-4d9b-95da-2cebc9142c33",
+      "enabled": true
+    },
+    "Cuisine (enceinte)": {
+      "hue_room_id": "1e9b2c5d-4adc-48f8-86be-754fd33ba6ba",
+      "enabled": true
+    },
+    "Salle de jeux (enceinte)": {
+      "hue_room_id": "58b32637-7212-4f10-b62c-2b19e987acc2",
+      "enabled": true
+    },
+    "Chambre Parents (enceinte)": {
+      "hue_room_id": "5960401e-b642-4d78-a0db-a505f6c03a35",
+      "enabled": true
+    },
+    "Chambre Lilian (enceinte)": {
+      "hue_room_id": "dd1e3e36-c9a1-4ed0-89c8-79d5e6119502",
+      "enabled": true
+    },
+    "Chambre Thaïs (rpi)": {
+      "hue_room_id": "c68e49c4-aded-4a29-aa6a-4c189c282c09",
+      "enabled": true
+    }
+  },
+  "styles": [
+    {
+      "id": "energique",
+      "label": "Énergique",
+      "conditions": [{"param": "energy", "op": ">", "value": 0.75}],
+      "scenes": ["Ibiza", "Magnéto", "Tokyo"]
+    },
+    {
+      "id": "dansant",
+      "label": "Dansant",
+      "conditions": [{"param": "danceability", "op": ">", "value": 0.7}, {"param": "energy", "op": ">", "value": 0.5}],
+      "scenes": ["Miami", "Rio", "Malibu pink"]
+    },
+    {
+      "id": "calme",
+      "label": "Calme",
+      "conditions": [{"param": "energy", "op": "<", "value": 0.35}],
+      "scenes": ["Sommeil", "Détente", "Starlight"]
+    },
+    {
+      "id": "acoustique",
+      "label": "Acoustique",
+      "conditions": [{"param": "acousticness", "op": ">", "value": 0.6}, {"param": "energy", "op": "<", "value": 0.6}],
+      "scenes": ["Étang doré", "Rougegorge d'automne", "Champignon des bois"]
+    },
+    {
+      "id": "festif",
+      "label": "Festif",
+      "conditions": [{"param": "valence", "op": ">", "value": 0.7}, {"param": "energy", "op": ">", "value": 0.6}],
+      "scenes": ["Soho", "Ville de l'amour", "Chinatown"]
+    },
+    {
+      "id": "melancolique",
+      "label": "Mélancolique",
+      "conditions": [{"param": "valence", "op": "<", "value": 0.35}, {"param": "energy", "op": "<", "value": 0.5}],
+      "scenes": ["Aurore boréale", "Starlight", "Sommeil"]
+    },
+    {
+      "id": "instrumental",
+      "label": "Instrumental",
+      "conditions": [{"param": "instrumentalness", "op": ">", "value": 0.5}],
+      "scenes": ["Concentration", "Détente", "Lecture"]
+    },
+    {
+      "id": "defaut",
+      "label": "Par défaut",
+      "conditions": [],
+      "scenes": ["Lumineux", "Lumineux", "Lumineux"]
+    }
+  ],
+  "known_scenes": [
+    {"name": "Aurore boréale", "mode": "dynamic_palette", "colors": ["#0e5a2b","#1b533b","#0d565a","#0e47ff","#182dff"]},
+    {"name": "Champignon des bois", "mode": "dynamic_palette", "colors": ["#cfd637","#ffbf4c","#ffb23b","#ff8716","#ff2e1e"]},
+    {"name": "Chinatown", "mode": "dynamic_palette", "colors": ["#ff0c11","#ff181f","#ff442d","#ff6404"]},
+    {"name": "Coucher de soleil sur la savane", "mode": "dynamic_palette", "colors": ["#ff2b06","#ff4a12","#ff681a","#d48115","#a99228"]},
+    {"name": "Détente", "mode": "active", "colors": []},
+    {"name": "Éclosion ambrée", "mode": "dynamic_palette", "colors": ["#ff4d13","#ff7104","#ff8305","#ff9118","#ff9243"]},
+    {"name": "Étang doré", "mode": "dynamic_palette", "colors": ["#e5950e","#f38f0c","#f78e06","#ff7205","#ff6b04"]},
+    {"name": "Honolulu", "mode": "dynamic_palette", "colors": ["#ff0e15","#f62a1a","#de350f","#c73f06","#8e5710"]},
+    {"name": "Ibiza", "mode": "dynamic_palette", "colors": ["#ff3c0a","#ff4a0a","#db5c0d","#aa710b","#927b13"]},
+    {"name": "Lecture", "mode": "active", "colors": []},
+    {"name": "Lumineux", "mode": "active", "colors": []},
+    {"name": "Magnéto", "mode": "dynamic_palette", "colors": ["#3ce1ff","#1affff","#19ffff","#e6ec18","#ffba09"]},
+    {"name": "Malibu pink", "mode": "dynamic_palette", "colors": ["#ff5b46","#ff4dfb","#ff43ff","#22e4ff","#5082ff"]},
+    {"name": "Miami", "mode": "dynamic_palette", "colors": ["#ff8023","#ff6132","#ff3782","#5ed3ff","#0fffff"]},
+    {"name": "Rio", "mode": "dynamic_palette", "colors": ["#ff4eff","#ff2d86","#ff4c75","#ff7f22","#ffbd15"]},
+    {"name": "Rougegorge d'automne", "mode": "dynamic_palette", "colors": ["#fcae47","#ffa82a","#ffa10b","#ff920f","#ff6904"]},
+    {"name": "Soho", "mode": "dynamic_palette", "colors": ["#ff0a60","#ff692f","#ff3e7d","#ff09ff","#1cd597"]},
+    {"name": "Sommeil", "mode": "dynamic_palette", "colors": ["#bd0f05","#b21409","#991f05","#812805","#703006"]},
+    {"name": "Starlight", "mode": "dynamic_palette", "colors": ["#59331b","#5e3029","#602d48","#5f288d","#4628ff"]},
+    {"name": "Tokyo", "mode": "dynamic_palette", "colors": ["#9801ff","#1487ff","#ff04ff","#ff0746","#e55103"]},
+    {"name": "Ville de l'amour", "mode": "dynamic_palette", "colors": ["#4f00ff","#2658ff","#0f89ff","#ff3d07","#c25805"]},
+    {"name": "Concentration", "mode": "active", "colors": []},
+    {"name": "Veilleuse", "mode": "active", "colors": []}
+  ]
+}
