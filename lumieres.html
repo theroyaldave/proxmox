@@ -161,6 +161,62 @@ main{flex:1;padding:20px;max-width:1100px;margin:0 auto;width:100%}
 /* Désactivée */
 .room-disabled-msg{font-size:11px;color:#444;padding:8px 0;font-style:italic}
 
+/* CUSTOM SELECT DROPDOWN avec pastilles */
+.custom-select-wrap{
+  position:relative;flex:1;min-width:130px;
+}
+.custom-select-btn{
+  display:flex;align-items:center;gap:5px;
+  background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;
+  padding:3px 6px;cursor:pointer;
+  transition:border-color .15s;width:100%;
+  font-family:inherit;color:#ccc;font-size:11px;
+}
+.custom-select-btn:hover{border-color:#333}
+.custom-select-btn.open{border-color:#2d5a45}
+.custom-select-dots{display:flex;gap:2px;align-items:center;flex-shrink:0}
+.custom-select-dot{width:8px;height:8px;border-radius:50%;border:1px solid rgba(255,255,255,.2);flex-shrink:0}
+.custom-select-label{flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.custom-select-caret{color:#444;font-size:9px;flex-shrink:0}
+.custom-select-dropdown{
+  position:absolute;top:calc(100% + 4px);left:0;right:0;
+  background:#1a1a1a;border:1px solid #333;border-radius:10px;
+  z-index:200;overflow-y:auto;max-height:260px;
+  box-shadow:0 8px 24px rgba(0,0,0,.6);
+  display:none;
+}
+.custom-select-wrap.open .custom-select-dropdown{display:block}
+.custom-select-option{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 8px;cursor:pointer;font-size:11px;color:#ccc;
+  border-radius:0;transition:background .1s;
+}
+.custom-select-option:first-child{border-radius:10px 10px 0 0}
+.custom-select-option:last-child{border-radius:0 0 10px 10px}
+.custom-select-option:hover{background:#252525}
+.custom-select-option.selected{background:#1d3028;color:#5dcaa5}
+.custom-select-option-dots{display:flex;gap:2px;align-items:center;flex-shrink:0;width:46px}
+.custom-select-option-dot{width:7px;height:7px;border-radius:50%;border:1px solid rgba(255,255,255,.15);flex-shrink:0}
+.custom-select-option-thumb{width:28px;height:18px;border-radius:5px;object-fit:cover;flex-shrink:0;background:#2a2a2a}
+.custom-select-option-thumb-grad{width:28px;height:18px;border-radius:5px;flex-shrink:0}
+
+
+/* 9 boules fixes par carte */
+.scene-card-dot.striped{
+  background: repeating-linear-gradient(
+    45deg, #333 0px, #333 2px, #555 2px, #555 4px
+  ) !important;
+  border-color: rgba(255,255,255,.1) !important;
+}
+/* Actions pièces inline */
+.rooms-actions{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 0 16px;
+}
+.rooms-actions-right{display:flex;gap:8px}
+.rooms-footer-info{font-size:12px;color:#555}
+.rooms-footer-info.modified{color:#5dcaa5}
+.footer-bar{display:none!important}
 /* CREATION SCENARIO */
 .create-section{margin-top:40px;padding-top:24px;border-top:1px solid #1e1e1e}
 .create-panel{background:#111;border:1px solid #222;border-radius:14px;padding:20px 24px}
@@ -172,33 +228,28 @@ main{flex:1;padding:20px;max-width:1100px;margin:0 auto;width:100%}
 .form-label{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.06em}
 .form-input{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;color:#ccc;font-size:12px;padding:8px 10px;font-family:inherit;outline:none;transition:border-color .15s}
 .form-input:focus{border-color:#2d5a45}
-.colors-grid{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.colors-grid{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
 .color-slot{display:flex;flex-direction:column;align-items:center;gap:4px}
 .color-slot-label{font-size:10px;color:#555}
-.color-picker-wrap{position:relative;width:36px;height:36px;border-radius:8px;overflow:hidden;border:2px solid #2a2a2a;cursor:pointer;transition:border-color .15s}
-.color-picker-wrap:hover{border-color:#444}
-.color-picker-wrap.disabled{opacity:.3;pointer-events:none}
-.color-picker-wrap input[type=color]{position:absolute;inset:-8px;width:calc(100%+16px);height:calc(100%+16px);border:none;padding:0;cursor:pointer;opacity:1}
-.color-slot-toggle{display:flex;align-items:center;gap:4px;font-size:10px;color:#555;cursor:pointer;margin-top:2px}
-.color-slot-toggle input{accent-color:#1d9e75;width:12px;height:12px}
+.color-picker-wrap{position:relative;width:36px;height:36px;border-radius:8px;overflow:hidden;border:2px solid #333;cursor:pointer;transition:border-color .15s}
+.color-picker-wrap:hover{border-color:#555}
+.color-picker-wrap input[type=color]{position:absolute;inset:-8px;width:calc(100%+16px);height:calc(100%+16px);border:none;padding:0;cursor:pointer}
 .speed-wrap{display:flex;align-items:center;gap:10px}
 .speed-slider{flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:#2a2a2a;outline:none;cursor:pointer}
 .speed-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#1d9e75;cursor:pointer;border:2px solid #111}
 .speed-val{font-size:12px;color:#5dcaa5;width:30px;text-align:right;flex-shrink:0}
 .speed-labels{display:flex;justify-content:space-between;font-size:10px;color:#444;margin-top:2px}
-.upload-zone{border:2px dashed #2a2a2a;border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:border-color .15s;background:#0f0f0f;position:relative}
+.upload-zone{border:2px dashed #2a2a2a;border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:border-color .15s;background:#0f0f0f}
 .upload-zone:hover{border-color:#444}
 .upload-zone.has-file{border-color:#2d5a45;background:#0d1a13}
-.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .upload-zone-text{font-size:11px;color:#555;pointer-events:none}
-.upload-preview{width:100%;max-height:80px;object-fit:cover;border-radius:6px;display:none;pointer-events:none}
+.upload-preview{width:100%;max-height:80px;object-fit:cover;border-radius:6px;display:none}
 .preview-dots{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
-.preview-dot{width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,.15)}
+.preview-dot{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.15)}
 .create-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;align-items:center}
 .create-result{font-size:11px;flex:1}
 .create-result.ok{color:#5dcaa5}
 .create-result.err{color:#e05555}
-.custom-badge{background:rgba(29,158,117,.2);color:#5dcaa5;font-size:10px;padding:2px 6px;border-radius:4px;border:1px solid rgba(29,158,117,.3)}
 .scene-card.custom .scene-card-badge{background:rgba(29,158,117,.85)}
 .scene-card .delete-btn{
   position:absolute;bottom:7px;left:7px;
@@ -206,7 +257,6 @@ main{flex:1;padding:20px;max-width:1100px;margin:0 auto;width:100%}
   background:rgba(90,45,45,.85);border:1px solid rgba(255,80,80,.3);
   display:none;align-items:center;justify-content:center;
   cursor:pointer;font-size:10px;color:#e05555;
-  transition:background .15s;
 }
 .scene-card:hover .delete-btn{display:flex}
 .delete-btn:hover{background:rgba(150,45,45,.9)!important}
@@ -234,6 +284,13 @@ main{flex:1;padding:20px;max-width:1100px;margin:0 auto;width:100%}
   <!-- Pièces -->
   <div class="section">
     <div class="section-title">Configuration par pièce</div>
+    <div class="rooms-actions">
+      <span class="rooms-footer-info" id="footer-info">Aucune modification</span>
+      <div class="rooms-actions-right">
+        <button class="btn" onclick="cancelChanges()"><i class="ti ti-x"></i> Annuler</button>
+        <button class="btn primary" onclick="showSaveModal()"><i class="ti ti-device-floppy"></i> Sauvegarder</button>
+      </div>
+    </div>
     <div id="rooms-list" class="rooms-list"><div class="room-card expanded">
         <div class="room-header" onclick="toggleRoom('Atelier')">
           <i class="ti ti-device-speaker" style="font-size:14px;color:#555"></i>
@@ -939,38 +996,29 @@ main{flex:1;padding:20px;max-width:1100px;margin:0 auto;width:100%}
   </div></div>
   </div>
 
-  <!-- CRÉATION DE SCÉNARIO -->
   <div class="create-section">
     <div class="section-title">Créer un nouveau scénario</div>
     <div class="create-panel">
       <div class="create-title"><i class="ti ti-palette" style="color:#f5a623"></i> Nouveau scénario personnalisé</div>
       <div class="create-grid">
-
-        <!-- Nom -->
         <div class="form-group">
           <label class="form-label">Nom du scénario</label>
           <input type="text" class="form-input" id="create-name" placeholder="Ex: Mon coucher de soleil" maxlength="32">
         </div>
-
-        <!-- Vitesse -->
         <div class="form-group">
           <label class="form-label">Vitesse de transition</label>
           <div class="speed-wrap">
-            <input type="range" class="speed-slider" id="create-speed" min="0" max="1" step="0.05" value="0.5" oninput="document.getElementById('create-speed-val').textContent=parseFloat(this.value).toFixed(2)">
+            <input type="range" class="speed-slider" id="create-speed" min="0" max="1" step="0.05" value="0.5"
+              oninput="document.getElementById('create-speed-val').textContent=parseFloat(this.value).toFixed(2)">
             <span class="speed-val" id="create-speed-val">0.50</span>
           </div>
           <div class="speed-labels"><span>Lent</span><span>Rapide</span></div>
         </div>
-
-        <!-- Couleurs -->
         <div class="form-group full">
-          <label class="form-label">Couleurs (jusqu'à 9) — les 1 à 5 sont obligatoires</label>
-          <div class="colors-grid" id="colors-grid">
-          </div>
+          <label class="form-label">9 couleurs de la palette</label>
+          <div class="colors-grid" id="colors-grid"></div>
           <div class="preview-dots" id="preview-dots"></div>
         </div>
-
-        <!-- Image -->
         <div class="form-group full">
           <label class="form-label">Image de fond (optionnel — JPG/PNG)</label>
           <div class="upload-zone" id="upload-zone" onclick="document.getElementById('create-img-input').click()">
@@ -979,7 +1027,6 @@ main{flex:1;padding:20px;max-width:1100px;margin:0 auto;width:100%}
             <div class="upload-zone-text" id="upload-zone-text"><i class="ti ti-photo"></i> Cliquer pour choisir une image</div>
           </div>
         </div>
-
       </div>
       <div class="create-actions">
         <span class="create-result" id="create-result"></span>
@@ -988,7 +1035,6 @@ main{flex:1;padding:20px;max-width:1100px;margin:0 auto;width:100%}
       </div>
     </div>
   </div>
-
 </main>
 
 <div class="footer-bar">
@@ -1058,15 +1104,20 @@ const SCENE_IMAGE_MAP = {
 
 function sceneImageUrl(name) {
   const file = SCENE_IMAGE_MAP[name];
-  return file ? `/hue-scenes/${file}` : null;
+  return file ? `/hue-scenes/${file}` : '/hue-scenes/defaut.jpg';
 }
 
 function renderColorDots(colors, small=false) {
-  if (!colors || !colors.length) return '';
   const size = small ? '8px' : '11px';
-  return colors.map(c =>
-    `<div class="scene-card-dot" style="width:${size};height:${size};background:${c}"></div>`
-  ).join('');
+  const dots = [];
+  for (let i = 0; i < 9; i++) {
+    if (colors && i < colors.length) {
+      dots.push(`<div class="scene-card-dot" style="width:${size};height:${size};background:${colors[i]}"></div>`);
+    } else {
+      dots.push(`<div class="scene-card-dot striped" style="width:${size};height:${size}"></div>`);
+    }
+  }
+  return dots.join('');
 }
 
 function colorGradient(colors) {
@@ -1132,6 +1183,106 @@ function renderSelectThumb(sceneName) {
   return `<div class="select-thumb-gradient" style="background:${grad}"></div>`;
 }
 
+function renderSceneDots(colors, forOption=false) {
+  const cls = forOption ? 'custom-select-option-dot' : 'custom-select-dot';
+  const wrapCls = forOption ? 'custom-select-option-dots' : 'custom-select-dots';
+  const dots = [];
+  for (let i = 0; i < 9; i++) {
+    if (colors && i < colors.length) {
+      dots.push(`<span class="${cls}" style="background:${colors[i]}"></span>`);
+    } else {
+      dots.push(`<span class="${cls}" style="background:repeating-linear-gradient(45deg,#333 0px,#333 2px,#555 2px,#555 4px)"></span>`);
+    }
+  }
+  return `<div class="${wrapCls}">${dots.join('')}</div>`;
+}
+
+function renderCustomSelect(roomName, styleId, idx, currentScene) {
+  const uid = `cs_${roomName.replace(/\s+/g,'_')}_${styleId}_${idx}`;
+  const info = getSceneInfo(currentScene);
+  const imgUrl = sceneImageUrl(currentScene);
+
+  let thumbHtml;
+  if (imgUrl) {
+    thumbHtml = `<img class="custom-select-option-thumb" src="${imgUrl}" onerror="this.style.display='none'">`;
+  } else {
+    thumbHtml = `<div class="custom-select-option-thumb-grad" style="background:${colorGradient(info.colors)}"></div>`;
+  }
+
+  const options = knownScenes.map(s => {
+    const si = s;
+    const iurl = sceneImageUrl(si.name);
+    const sel = si.name === currentScene ? ' selected' : '';
+    let optThumb;
+    if (iurl) {
+      optThumb = `<img class="custom-select-option-thumb" src="${iurl}" onerror="this.style.display='none'">`;
+    } else {
+      optThumb = `<div class="custom-select-option-thumb-grad" style="background:${colorGradient(si.colors)}"></div>`;
+    }
+    const dotHtml = renderSceneDots(si.colors, true);
+    return `<div class="custom-select-option${sel}" onclick="customSelectPick('${uid}','${roomName}','${styleId}',${idx},'${si.name.replace(/'/g,"\\'")}',this)">
+      ${optThumb}
+      ${dotHtml}
+      <span>${si.name}</span>
+    </div>`;
+  }).join('');
+
+  return `<div class="custom-select-wrap" id="${uid}">
+    <div class="custom-select-btn" onclick="toggleCustomSelect('${uid}')">
+      ${thumbHtml}
+      ${renderSceneDots(info.colors, false)}
+      <span class="custom-select-label">${currentScene}</span>
+      <span class="custom-select-caret">▾</span>
+    </div>
+    <div class="custom-select-dropdown">${options}</div>
+  </div>`;
+}
+
+function toggleCustomSelect(uid) {
+  const wrap = document.getElementById(uid);
+  const isOpen = wrap.classList.contains('open');
+  // Fermer tous les autres
+  document.querySelectorAll('.custom-select-wrap.open').forEach(el => {
+    if (el.id !== uid) el.classList.remove('open');
+  });
+  if (isOpen) {
+    wrap.classList.remove('open');
+  } else {
+    wrap.classList.add('open');
+    // Scroll vers option sélectionnée
+    const sel = wrap.querySelector('.custom-select-option.selected');
+    if (sel) setTimeout(() => sel.scrollIntoView({block:'nearest'}), 50);
+  }
+}
+
+function customSelectPick(uid, roomName, styleId, idx, sceneName, optEl) {
+  setScene(roomName, styleId, idx, sceneName);
+  const wrap = document.getElementById(uid);
+  // MAJ option sélectionnée
+  wrap.querySelectorAll('.custom-select-option').forEach(el => el.classList.remove('selected'));
+  optEl.classList.add('selected');
+  // MAJ bouton
+  const btn = wrap.querySelector('.custom-select-btn');
+  const imgUrl = sceneImageUrl(sceneName);
+  const info = getSceneInfo(sceneName);
+  let thumbHtml;
+  if (imgUrl) {
+    thumbHtml = `<img class="custom-select-option-thumb" src="${imgUrl}" onerror="this.style.display='none'">`;
+  } else {
+    thumbHtml = `<div class="custom-select-option-thumb-grad" style="background:${colorGradient(info.colors)}"></div>`;
+  }
+  btn.innerHTML = thumbHtml + renderSceneDots(info.colors, false) +
+    `<span class="custom-select-label">${sceneName}</span><span class="custom-select-caret">▾</span>`;
+  wrap.classList.remove('open');
+}
+
+// Fermer dropdowns au clic extérieur
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.custom-select-wrap')) {
+    document.querySelectorAll('.custom-select-wrap.open').forEach(el => el.classList.remove('open'));
+  }
+});
+
 function render() {
   modified = JSON.stringify(currentConfig) !== JSON.stringify(originalConfig);
   const info = document.getElementById('footer-info');
@@ -1160,15 +1311,7 @@ function render() {
 
           const selects = [0,1,2].map(idx => {
             const cur = roomScenes[idx] || style.scenes[idx] || 'Lumineux';
-            const opts = knownScenes.map(s =>
-              `<option value="${s.name}"${s.name===cur?' selected':''}>${s.name}</option>`
-            ).join('');
-            return `<div class="scene-select-wrap">
-              ${renderSelectThumb(cur)}
-              <select class="scene-select" onchange="setScene('${roomName}','${style.id}',${idx},this.value);updateThumb(this)">
-                ${opts}
-              </select>
-            </div>`;
+            return renderCustomSelect(roomName, style.id, idx, cur);
           }).join('');
 
           return `<div class="style-row">
@@ -1275,91 +1418,62 @@ function showToast(msg, isError=false) {
 
 // ─── CRÉATION DE SCÉNARIO ───────────────────────────────────────
 let uploadedImageFile = null;
-let customScenes = [];
 
-// Initialiser les 9 color pickers
 function initColorPickers() {
   const grid = document.getElementById('colors-grid');
+  if (!grid) return;
   grid.innerHTML = '';
-  const defaults = ['#ff3c0a','#ff8023','#ffba09','#1affff','#3ce1ff','','','',''];
+  const defaults = ['#ff3c0a','#ff8023','#ffba09','#1affff','#3ce1ff','#a020f0','#00c864','#ff1493','#ffffff'];
   for (let i = 0; i < 9; i++) {
-    const required = i < 5;
     const slot = document.createElement('div');
     slot.className = 'color-slot';
     slot.innerHTML = `
       <span class="color-slot-label">${i+1}</span>
-      <div class="color-picker-wrap${required?'':' disabled'}" id="cpwrap-${i}">
-        <input type="color" id="cp-${i}" value="${defaults[i]||'#ffffff'}"
+      <div class="color-picker-wrap" id="cpwrap-${i}">
+        <input type="color" id="cp-${i}" value="${defaults[i]}"
           oninput="updatePreviewDots()" onchange="updatePreviewDots()">
-      </div>
-      ${!required ? `<label class="color-slot-toggle">
-        <input type="checkbox" id="cp-en-${i}" onchange="toggleColorSlot(${i})"> actif
-      </label>` : '<div style="height:18px"></div>'}
-    `;
+      </div>`;
     grid.appendChild(slot);
   }
   updatePreviewDots();
 }
 
-function toggleColorSlot(i) {
-  const enabled = document.getElementById('cp-en-'+i).checked;
-  const wrap = document.getElementById('cpwrap-'+i);
-  wrap.classList.toggle('disabled', !enabled);
-  updatePreviewDots();
-}
-
 function getActiveColors() {
-  const colors = [];
-  for (let i = 0; i < 9; i++) {
-    const required = i < 5;
-    const enabled = required || (document.getElementById('cp-en-'+i) && document.getElementById('cp-en-'+i).checked);
-    if (enabled) {
-      colors.push(document.getElementById('cp-'+i).value);
-    }
-  }
-  return colors;
+  return Array.from({length:9}, (_,i) => document.getElementById('cp-'+i).value);
 }
 
 function updatePreviewDots() {
   const colors = getActiveColors();
-  const dotsDiv = document.getElementById('preview-dots');
-  dotsDiv.innerHTML = colors.map(c =>
-    `<div class="preview-dot" style="background:${c}"></div>`
-  ).join('');
+  const d = document.getElementById('preview-dots');
+  if (d) d.innerHTML = colors.map(c => `<div class="preview-dot" style="background:${c}"></div>`).join('');
 }
 
 function handleImageSelect(input) {
   const file = input.files[0];
   if (!file) return;
-  const preview = document.getElementById('upload-preview');
-  const zone = document.getElementById('upload-zone');
-  const txt = document.getElementById('upload-zone-text');
   const reader = new FileReader();
   reader.onload = e => {
-    preview.src = e.target.result;
-    preview.style.display = 'block';
-    txt.style.display = 'none';
-    zone.classList.add('has-file');
+    const prev = document.getElementById('upload-preview');
+    prev.src = e.target.result; prev.style.display = 'block';
+    document.getElementById('upload-zone-text').style.display = 'none';
+    document.getElementById('upload-zone').classList.add('has-file');
   };
   reader.readAsDataURL(file);
   uploadedImageFile = file;
 }
 
 async function uploadImage(file) {
-  const formData = new FormData();
-  formData.append('image', file, file.name);
-  const xhr = new XMLHttpRequest();
+  const fd = new FormData();
+  fd.append('image', file, file.name);
   return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
     xhr.open('POST', '/upload-scene-image');
     xhr.onload = () => {
-      try {
-        const r = JSON.parse(xhr.responseText);
-        if (r.status === 'ok') resolve(r.filename);
-        else reject(r.message);
-      } catch(e) { reject('Erreur upload'); }
+      try { const r = JSON.parse(xhr.responseText); r.status==='ok' ? resolve(r.filename) : reject(r.message); }
+      catch(e) { reject('Erreur upload'); }
     };
     xhr.onerror = () => reject('Erreur réseau upload');
-    xhr.send(formData);
+    xhr.send(fd);
   });
 }
 
@@ -1368,40 +1482,30 @@ async function submitCreateScene() {
   const speed = parseFloat(document.getElementById('create-speed').value);
   const colors = getActiveColors();
   const resultEl = document.getElementById('create-result');
-
-  if (!name) { resultEl.textContent = 'Veuillez saisir un nom.'; resultEl.className='create-result err'; return; }
-  if (colors.length < 1) { resultEl.textContent = 'Au moins une couleur requise.'; resultEl.className='create-result err'; return; }
-
-  resultEl.textContent = 'Création en cours…'; resultEl.className='create-result';
-  document.getElementById('spinner').className = 'spinner-overlay visible';
-  document.getElementById('spinner-text').textContent = 'Création du scénario sur le bridge Hue…';
-
+  if (!name) { resultEl.textContent='Veuillez saisir un nom.'; resultEl.className='create-result err'; return; }
+  resultEl.textContent='Création en cours…'; resultEl.className='create-result';
+  document.getElementById('spinner').className='spinner-overlay visible';
+  document.getElementById('spinner-text').textContent='Création du scénario sur le bridge Hue…';
   try {
-    // 1. Upload image si présente
     let image_file = '';
     if (uploadedImageFile) {
-      document.getElementById('spinner-text').textContent = 'Upload de l\'image…';
-      try { image_file = await uploadImage(uploadedImageFile); } catch(e) { console.warn('Image upload failed:', e); }
+      document.getElementById('spinner-text').textContent="Upload de l'image…";
+      try { image_file = await uploadImage(uploadedImageFile); } catch(e) { console.warn('img upload:', e); }
     }
-
-    // 2. Créer la scène
-    document.getElementById('spinner-text').textContent = 'Création sur le bridge Hue…';
+    document.getElementById('spinner-text').textContent='Création sur le bridge Hue…';
     const r = await fetch('/create-custom-scene', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ name, colors, speed, image_file })
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name, colors, speed, image_file})
     });
     const data = await r.json();
-    document.getElementById('spinner').className = 'spinner-overlay';
-
+    document.getElementById('spinner').className='spinner-overlay';
     if (data.status === 'ok') {
       const nb = data.created ? data.created.length : 0;
-      resultEl.textContent = `✓ "${name}" créé dans ${nb} pièce(s)` + (data.errors && data.errors.length ? ` — ${data.errors.length} erreur(s)` : '');
+      resultEl.textContent = `✓ "${name}" créé dans ${nb} pièce(s)` + (data.errors&&data.errors.length?` — ${data.errors.length} erreur(s)`:'');
       resultEl.className = 'create-result ok';
-      // Ajouter dans knownScenes localement et re-render
+      // Ajouter dans knownScenes + SCENE_IMAGE_MAP
       knownScenes = knownScenes.filter(s => s.name !== name);
-      knownScenes.push({ name, colors, mode: 'dynamic_palette', custom: true });
-      // Mettre à jour SCENE_IMAGE_MAP si image uploadée
+      knownScenes.push({name, colors, mode:'dynamic_palette', custom:true});
       if (image_file) SCENE_IMAGE_MAP[name] = image_file;
       render();
       showToast(`Scénario "${name}" créé`);
@@ -1410,70 +1514,61 @@ async function submitCreateScene() {
       resultEl.className = 'create-result err';
     }
   } catch(e) {
-    document.getElementById('spinner').className = 'spinner-overlay';
-    resultEl.textContent = 'Erreur réseau : ' + e;
-    resultEl.className = 'create-result err';
+    document.getElementById('spinner').className='spinner-overlay';
+    resultEl.textContent='Erreur réseau : '+e; resultEl.className='create-result err';
   }
 }
 
 async function deleteCustomScene(name) {
   if (!confirm(`Supprimer le scénario "${name}" de toutes les pièces ?`)) return;
-  document.getElementById('spinner').className = 'spinner-overlay visible';
-  document.getElementById('spinner-text').textContent = 'Suppression…';
+  document.getElementById('spinner').className='spinner-overlay visible';
+  document.getElementById('spinner-text').textContent='Suppression…';
   try {
     const r = await fetch('/delete-custom-scene', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ name })
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name})
     });
     const data = await r.json();
-    document.getElementById('spinner').className = 'spinner-overlay';
-    if (data.status === 'ok') {
+    document.getElementById('spinner').className='spinner-overlay';
+    if (data.status==='ok') {
       knownScenes = knownScenes.filter(s => s.name !== name);
       delete SCENE_IMAGE_MAP[name];
-      render();
-      showToast(`"${name}" supprimé`);
-    } else {
-      showToast('Erreur : ' + data.message, true);
-    }
+      render(); showToast(`"${name}" supprimé`);
+    } else { showToast('Erreur : '+data.message, true); }
   } catch(e) {
-    document.getElementById('spinner').className = 'spinner-overlay';
+    document.getElementById('spinner').className='spinner-overlay';
     showToast('Erreur réseau', true);
   }
 }
 
 function resetCreateForm() {
-  document.getElementById('create-name').value = '';
-  document.getElementById('create-speed').value = '0.5';
-  document.getElementById('create-speed-val').textContent = '0.50';
-  document.getElementById('upload-preview').style.display = 'none';
-  document.getElementById('upload-zone-text').style.display = '';
+  document.getElementById('create-name').value='';
+  document.getElementById('create-speed').value='0.5';
+  document.getElementById('create-speed-val').textContent='0.50';
+  const prev = document.getElementById('upload-preview');
+  prev.style.display='none'; prev.src='';
+  document.getElementById('upload-zone-text').style.display='';
   document.getElementById('upload-zone').classList.remove('has-file');
-  document.getElementById('create-img-input').value = '';
-  document.getElementById('create-result').textContent = '';
-  uploadedImageFile = null;
+  document.getElementById('create-img-input').value='';
+  document.getElementById('create-result').textContent='';
+  uploadedImageFile=null;
   initColorPickers();
 }
 
-// Charger les scènes custom depuis l'API et les fusionner dans knownScenes
 async function loadCustomScenes() {
   try {
     const r = await fetch('/custom-scenes.json?_='+Date.now());
     if (!r.ok) return;
     const data = await r.json();
-    customScenes = data.scenes || [];
-    customScenes.forEach(cs => {
-      if (!knownScenes.find(s => s.name === cs.name)) {
-        knownScenes.push({ name: cs.name, colors: cs.colors, mode: 'dynamic_palette', custom: true });
-      }
+    (data.scenes||[]).forEach(cs => {
+      if (!knownScenes.find(s => s.name===cs.name))
+        knownScenes.push({name:cs.name, colors:cs.colors, mode:'dynamic_palette', custom:true});
       if (cs.image_file) SCENE_IMAGE_MAP[cs.name] = cs.image_file;
     });
   } catch(e) {}
 }
 // ─── FIN CRÉATION ────────────────────────────────────────────────
 
-
-// Init color pickers au chargement
 initColorPickers();
 loadConfig();
 
