@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="fr">
-<head>
+<html lang="fr"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lumières — Snapcast</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="Lumieres_files/tabler-icons.min_ojDl.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#0a0a0a;color:#e0e0e0;font-family:system-ui,-apple-system,sans-serif;min-height:100vh;display:flex;flex-direction:column}
@@ -45,14 +45,15 @@ main{flex:1;padding:20px;max-width:1100px;margin:0 auto;width:100%}
   position:absolute;inset:0;
   background:linear-gradient(to top, rgba(0,0,0,.75) 0%, rgba(0,0,0,.1) 55%, transparent 100%);
 }
+.scene-card-name{
+  position:absolute;top:8px;left:10px;right:10px;
+  font-size:12px;font-weight:600;color:#fff;
+  text-shadow:0 1px 4px rgba(0,0,0,.9);
+  line-height:1.2;
+}
 .scene-card-bottom{
   position:absolute;bottom:0;left:0;right:0;padding:8px 10px;
-  display:flex;align-items:flex-end;justify-content:space-between;gap:6px;
-}
-.scene-card-name{
-  font-size:12px;font-weight:600;color:#fff;
-  text-shadow:0 1px 4px rgba(0,0,0,.8);
-  line-height:1.2;flex:1;
+  display:flex;align-items:flex-end;justify-content:flex-end;gap:6px;
 }
 .scene-card-dots{
   display:flex;gap:3px;align-items:center;flex-shrink:0;
@@ -64,10 +65,13 @@ main{flex:1;padding:20px;max-width:1100px;margin:0 auto;width:100%}
 }
 .scene-card-badge{
   position:absolute;top:7px;right:7px;
-  font-size:9px;padding:2px 6px;border-radius:8px;
-  background:rgba(29,158,117,.85);color:#fff;
-  backdrop-filter:blur(4px);font-weight:600;
+  width:22px;height:22px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(6px);font-size:13px;
+  border:1px solid rgba(255,255,255,.2);
 }
+.scene-card-badge.dynamic{background:rgba(29,158,117,.85);}
+.scene-card-badge.fixed{background:rgba(80,80,80,.85);}
 
 /* PIÈCES */
 .rooms-list{display:flex;flex-direction:column;gap:10px}
@@ -156,6 +160,46 @@ main{flex:1;padding:20px;max-width:1100px;margin:0 auto;width:100%}
 
 /* Désactivée */
 .room-disabled-msg{font-size:11px;color:#444;padding:8px 0;font-style:italic}
+
+/* CUSTOM SELECT DROPDOWN avec pastilles */
+.custom-select-wrap{
+  position:relative;flex:1;min-width:130px;
+}
+.custom-select-btn{
+  display:flex;align-items:center;gap:5px;
+  background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;
+  padding:3px 6px;cursor:pointer;
+  transition:border-color .15s;width:100%;
+  font-family:inherit;color:#ccc;font-size:11px;
+}
+.custom-select-btn:hover{border-color:#333}
+.custom-select-btn.open{border-color:#2d5a45}
+.custom-select-dots{display:flex;gap:2px;align-items:center;flex-shrink:0}
+.custom-select-dot{width:8px;height:8px;border-radius:50%;border:1px solid rgba(255,255,255,.2);flex-shrink:0}
+.custom-select-label{flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.custom-select-caret{color:#444;font-size:9px;flex-shrink:0}
+.custom-select-dropdown{
+  position:absolute;top:calc(100% + 4px);left:0;right:0;
+  background:#1a1a1a;border:1px solid #333;border-radius:10px;
+  z-index:200;overflow-y:auto;max-height:260px;
+  box-shadow:0 8px 24px rgba(0,0,0,.6);
+  display:none;
+}
+.custom-select-wrap.open .custom-select-dropdown{display:block}
+.custom-select-option{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 8px;cursor:pointer;font-size:11px;color:#ccc;
+  border-radius:0;transition:background .1s;
+}
+.custom-select-option:first-child{border-radius:10px 10px 0 0}
+.custom-select-option:last-child{border-radius:0 0 10px 10px}
+.custom-select-option:hover{background:#252525}
+.custom-select-option.selected{background:#1d3028;color:#5dcaa5}
+.custom-select-option-dots{display:flex;gap:2px;align-items:center;flex-shrink:0;width:46px}
+.custom-select-option-dot{width:7px;height:7px;border-radius:50%;border:1px solid rgba(255,255,255,.15);flex-shrink:0}
+.custom-select-option-thumb{width:28px;height:18px;border-radius:5px;object-fit:cover;flex-shrink:0;background:#2a2a2a}
+.custom-select-option-thumb-grad{width:28px;height:18px;border-radius:5px;flex-shrink:0}
+
 </style>
 </head>
 <body>
@@ -165,32 +209,728 @@ main{flex:1;padding:20px;max-width:1100px;margin:0 auto;width:100%}
     <div><h1>Snapcast — Gestion des lumières</h1></div>
     <div class="status">
       <div class="status-dot" id="status-dot"></div>
-      <span id="status-txt">chargement…</span>
+      <span id="status-txt">connecté</span>
     </div>
   </div>
   <div class="header-right">
-    <a href="/" class="btn"><i class="ti ti-list"></i> Vue liste</a>
-    <a href="/plan.html" class="btn"><i class="ti ti-map-2"></i> Plan</a>
+    <a href="https://snapcast.theroyaldave.fr/" class="btn"><i class="ti ti-list"></i> Vue liste</a>
+    <a href="https://snapcast.theroyaldave.fr/plan.html" class="btn"><i class="ti ti-map-2"></i> Plan</a>
     <button class="btn" onclick="location.reload()"><i class="ti ti-refresh"></i> Actualiser</button>
   </div>
 </header>
 
 <main>
-  <!-- Scénarios disponibles -->
-  <div class="section">
-    <div class="section-title">Scénarios disponibles</div>
-    <div id="scenes-grid" class="scenes-grid"></div>
-  </div>
-
   <!-- Pièces -->
   <div class="section">
     <div class="section-title">Configuration par pièce</div>
-    <div id="rooms-list" class="rooms-list"></div>
+    <div id="rooms-list" class="rooms-list"><div class="room-card expanded">
+        <div class="room-header" onclick="toggleRoom('Atelier')">
+          <i class="ti ti-device-speaker" style="font-size:14px;color:#555"></i>
+          <span class="room-name">Atelier</span>
+          <button class="room-toggle on" onclick="event.stopPropagation();toggleEnabled('Atelier')" title="Désactiver"></button>
+          <i class="ti ti-chevron-down chevron"></i>
+        </div>
+        <div class="room-body"><div class="styles-grid"><div class="style-row">
+            <span class="style-label">⚡ Énergique</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Ibiza_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','energique',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza" selected="selected">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Magneto_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','energique',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto" selected="selected">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Tokyo_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','energique',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo" selected="selected">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">💃 Dansant</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Miami_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','dansant',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami" selected="selected">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Rio_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','dansant',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio" selected="selected">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Malibu_pink_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','dansant',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink" selected="selected">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">🌙 Calme</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Sommeil_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','calme',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil" selected="selected">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap"><img class="select-thumb" src="Lumieres_files/Aurore_boreale_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              
+              <select class="scene-select" onchange="setScene('Atelier','calme',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale" selected="selected">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Starlight_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','calme',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight" selected="selected">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">🎸 Acoustique</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Etang_dore_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','acoustique',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré" selected="selected">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Rouge_gorge_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','acoustique',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne" selected="selected">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Champignon_des_bois_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','acoustique',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois" selected="selected">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">🎉 Festif</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Soho_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','festif',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho" selected="selected">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Ville_de_lamour_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','festif',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour" selected="selected">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Chinatown_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','festif',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown" selected="selected">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">🌧 Mélancolique</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Aurore_boreale_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','melancolique',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale" selected="selected">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Starlight_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','melancolique',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight" selected="selected">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Sommeil_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','melancolique',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil" selected="selected">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">🎼 Instrumental</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Concentration_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','instrumental',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration" selected="selected">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Detente_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','instrumental',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente" selected="selected">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Lecture_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','instrumental',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture" selected="selected">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">✨ Par défaut</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Lumineux_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','defaut',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux" selected="selected">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Lumineux_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','defaut',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux" selected="selected">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Lumineux_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Atelier','defaut',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux" selected="selected">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div></div></div>
+      </div><div class="room-card">
+        <div class="room-header" onclick="toggleRoom('Cuisine')">
+          <i class="ti ti-device-speaker" style="font-size:14px;color:#555"></i>
+          <span class="room-name">Cuisine</span>
+          <button class="room-toggle on" onclick="event.stopPropagation();toggleEnabled('Cuisine')" title="Désactiver"></button>
+          <i class="ti ti-chevron-down chevron"></i>
+        </div>
+        <div class="room-body"><div class="styles-grid"><div class="style-row">
+            <span class="style-label">⚡ Énergique</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Ibiza_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','energique',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza" selected="selected">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Magneto_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','energique',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto" selected="selected">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Tokyo_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','energique',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo" selected="selected">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">💃 Dansant</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Miami_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','dansant',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami" selected="selected">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Rio_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','dansant',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio" selected="selected">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Malibu_pink_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','dansant',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink" selected="selected">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">🌙 Calme</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Sommeil_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','calme',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil" selected="selected">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Detente_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','calme',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente" selected="selected">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Starlight_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','calme',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight" selected="selected">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">🎸 Acoustique</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Etang_dore_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','acoustique',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré" selected="selected">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Rouge_gorge_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','acoustique',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne" selected="selected">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Champignon_des_bois_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','acoustique',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois" selected="selected">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">🎉 Festif</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Soho_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','festif',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho" selected="selected">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Ville_de_lamour_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','festif',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour" selected="selected">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Chinatown_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','festif',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown" selected="selected">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">🌧 Mélancolique</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Aurore_boreale_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','melancolique',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale" selected="selected">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Starlight_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','melancolique',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight" selected="selected">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Sommeil_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','melancolique',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil" selected="selected">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">🎼 Instrumental</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Concentration_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','instrumental',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration" selected="selected">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Detente_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','instrumental',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente" selected="selected">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Lecture_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','instrumental',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture" selected="selected">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">✨ Par défaut</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Lumineux_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','defaut',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux" selected="selected">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Lumineux_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','defaut',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux" selected="selected">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Lumineux_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Cuisine','defaut',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux" selected="selected">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div></div></div>
+      </div><div class="room-card">
+        <div class="room-header" onclick="toggleRoom('Salle de jeux')">
+          <i class="ti ti-device-speaker" style="font-size:14px;color:#555"></i>
+          <span class="room-name">Salle de jeux</span>
+          <button class="room-toggle on" onclick="event.stopPropagation();toggleEnabled('Salle de jeux')" title="Désactiver"></button>
+          <i class="ti ti-chevron-down chevron"></i>
+        </div>
+        <div class="room-body"><div class="styles-grid"><div class="style-row">
+            <span class="style-label">⚡ Énergique</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Ibiza_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','energique',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza" selected="selected">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Magneto_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','energique',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto" selected="selected">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Tokyo_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','energique',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo" selected="selected">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">💃 Dansant</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Miami_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','dansant',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami" selected="selected">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Rio_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','dansant',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio" selected="selected">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Malibu_pink_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','dansant',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink" selected="selected">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">🌙 Calme</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Sommeil_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','calme',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil" selected="selected">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Detente_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','calme',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente" selected="selected">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Starlight_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','calme',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight" selected="selected">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">🎸 Acoustique</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Etang_dore_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','acoustique',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré" selected="selected">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Rouge_gorge_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','acoustique',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne" selected="selected">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Champignon_des_bois_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','acoustique',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois" selected="selected">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">🎉 Festif</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Soho_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','festif',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho" selected="selected">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Ville_de_lamour_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','festif',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour" selected="selected">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Chinatown_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','festif',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown" selected="selected">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">🌧 Mélancolique</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Aurore_boreale_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','melancolique',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale" selected="selected">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Starlight_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','melancolique',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight" selected="selected">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Sommeil_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','melancolique',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil" selected="selected">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">🎼 Instrumental</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Detente_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','instrumental',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente" selected="selected">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Detente_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','instrumental',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente" selected="selected">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Lecture_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','instrumental',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture" selected="selected">Lecture</option><option value="Lumineux">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div><div class="style-row">
+            <span class="style-label">✨ Par défaut</span>
+            <div class="style-scenes"><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Lumineux_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','defaut',0,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux" selected="selected">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Lumineux_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','defaut',1,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux" selected="selected">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div><div class="scene-select-wrap">
+              <img class="select-thumb" src="Lumieres_files/Lumineux_ojDl.jpg" alt="" onerror="this.style.display='none'">
+              <select class="scene-select" onchange="setScene('Salle de jeux','defaut',2,this.value);updateThumb(this)">
+                <option value="Aurore boréale">Aurore boréale</option><option value="Champignon des bois">Champignon des bois</option><option value="Chinatown">Chinatown</option><option value="Coucher de soleil sur la savane">Coucher de soleil sur la savane</option><option value="Détente">Détente</option><option value="Éclosion ambrée">Éclosion ambrée</option><option value="Étang doré">Étang doré</option><option value="Honolulu">Honolulu</option><option value="Ibiza">Ibiza</option><option value="Lecture">Lecture</option><option value="Lumineux" selected="selected">Lumineux</option><option value="Magnéto">Magnéto</option><option value="Malibu pink">Malibu pink</option><option value="Miami">Miami</option><option value="Rio">Rio</option><option value="Rougegorge d'automne">Rougegorge d'automne</option><option value="Soho">Soho</option><option value="Sommeil">Sommeil</option><option value="Starlight">Starlight</option><option value="Tokyo">Tokyo</option><option value="Ville de l'amour">Ville de l'amour</option><option value="Concentration">Concentration</option><option value="Veilleuse">Veilleuse</option><option value="Suzuka">Suzuka</option>
+              </select>
+            </div></div>
+          </div></div></div>
+      </div><div class="room-card">
+        <div class="room-header" onclick="toggleRoom('Chambre Parents')">
+          <i class="ti ti-device-speaker" style="font-size:14px;color:#555"></i>
+          <span class="room-name">Chambre Parents</span>
+          <button class="room-toggle" onclick="event.stopPropagation();toggleEnabled('Chambre Parents')" title="Activer"></button>
+          <i class="ti ti-chevron-down chevron"></i>
+        </div>
+        <div class="room-body"><div class="room-disabled-msg">Pièce désactivée — les lumières ne seront pas contrôlées.</div></div>
+      </div><div class="room-card">
+        <div class="room-header" onclick="toggleRoom('Chambre Lilian')">
+          <i class="ti ti-device-speaker" style="font-size:14px;color:#555"></i>
+          <span class="room-name">Chambre Lilian</span>
+          <button class="room-toggle" onclick="event.stopPropagation();toggleEnabled('Chambre Lilian')" title="Activer"></button>
+          <i class="ti ti-chevron-down chevron"></i>
+        </div>
+        <div class="room-body"><div class="room-disabled-msg">Pièce désactivée — les lumières ne seront pas contrôlées.</div></div>
+      </div><div class="room-card">
+        <div class="room-header" onclick="toggleRoom('Chambre Thaïs')">
+          <i class="ti ti-device-speaker" style="font-size:14px;color:#555"></i>
+          <span class="room-name">Chambre Thaïs</span>
+          <button class="room-toggle" onclick="event.stopPropagation();toggleEnabled('Chambre Thaïs')" title="Activer"></button>
+          <i class="ti ti-chevron-down chevron"></i>
+        </div>
+        <div class="room-body"><div class="room-disabled-msg">Pièce désactivée — les lumières ne seront pas contrôlées.</div></div>
+      </div></div>
+  </div>
+
+  <!-- Scénarios disponibles -->
+  <div class="section">
+    <div class="section-title">Scénarios disponibles</div>
+    <div id="scenes-grid" class="scenes-grid"><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Aurore_boreale_ojDl.jpg" alt="Aurore boréale" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:linear-gradient(135deg, #0e5a2b, #1b533b, #0d565a, #0e47ff, #182dff)"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Aurore boréale</span>
+    <span class="scene-card-badge dynamic" title="Scénario dynamique">🌈</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"><div class="scene-card-dot" style="width:11px;height:11px;background:#0e5a2b"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#1b533b"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#0d565a"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#0e47ff"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#182dff"></div></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Champignon_des_bois_ojDl.jpg" alt="Champignon des bois" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:linear-gradient(135deg, #cfd637, #ffbf4c, #ffb23b, #ff8716, #ff2e1e)"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Champignon des bois</span>
+    <span class="scene-card-badge dynamic" title="Scénario dynamique">🌈</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"><div class="scene-card-dot" style="width:11px;height:11px;background:#cfd637"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ffbf4c"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ffb23b"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff8716"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff2e1e"></div></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Chinatown_ojDl.jpg" alt="Chinatown" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:linear-gradient(135deg, #ff0c11, #ff181f, #ff442d, #ff6404)"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Chinatown</span>
+    <span class="scene-card-badge dynamic" title="Scénario dynamique">🌈</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"><div class="scene-card-dot" style="width:11px;height:11px;background:#ff0c11"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff181f"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff442d"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff6404"></div></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Coucher_de_soleil_ojDl.jpg" alt="Coucher de soleil sur la savane" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:linear-gradient(135deg, #ff2b06, #ff4a12, #ff681a, #d48115, #a99228)"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Coucher de soleil sur la savane</span>
+    <span class="scene-card-badge dynamic" title="Scénario dynamique">🌈</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"><div class="scene-card-dot" style="width:11px;height:11px;background:#ff2b06"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff4a12"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff681a"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#d48115"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#a99228"></div></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Detente_ojDl.jpg" alt="Détente" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:#1a1a1a"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Détente</span>
+    <span class="scene-card-badge fixed" title="Scénario fixe">💡</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Eclosion_ambree_ojDl.jpg" alt="Éclosion ambrée" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:linear-gradient(135deg, #ff4d13, #ff7104, #ff8305, #ff9118, #ff9243)"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Éclosion ambrée</span>
+    <span class="scene-card-badge dynamic" title="Scénario dynamique">🌈</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"><div class="scene-card-dot" style="width:11px;height:11px;background:#ff4d13"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff7104"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff8305"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff9118"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff9243"></div></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Etang_dore_ojDl.jpg" alt="Étang doré" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:linear-gradient(135deg, #e5950e, #f38f0c, #f78e06, #ff7205, #ff6b04)"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Étang doré</span>
+    <span class="scene-card-badge dynamic" title="Scénario dynamique">🌈</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"><div class="scene-card-dot" style="width:11px;height:11px;background:#e5950e"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#f38f0c"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#f78e06"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff7205"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff6b04"></div></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Honolulu_ojDl.jpg" alt="Honolulu" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:linear-gradient(135deg, #ff0e15, #f62a1a, #de350f, #c73f06, #8e5710)"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Honolulu</span>
+    <span class="scene-card-badge dynamic" title="Scénario dynamique">🌈</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"><div class="scene-card-dot" style="width:11px;height:11px;background:#ff0e15"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#f62a1a"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#de350f"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#c73f06"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#8e5710"></div></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Ibiza_ojDl.jpg" alt="Ibiza" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:linear-gradient(135deg, #ff3c0a, #ff4a0a, #db5c0d, #aa710b, #927b13)"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Ibiza</span>
+    <span class="scene-card-badge dynamic" title="Scénario dynamique">🌈</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"><div class="scene-card-dot" style="width:11px;height:11px;background:#ff3c0a"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff4a0a"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#db5c0d"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#aa710b"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#927b13"></div></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Lecture_ojDl.jpg" alt="Lecture" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:#1a1a1a"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Lecture</span>
+    <span class="scene-card-badge fixed" title="Scénario fixe">💡</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Lumineux_ojDl.jpg" alt="Lumineux" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:#1a1a1a"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Lumineux</span>
+    <span class="scene-card-badge fixed" title="Scénario fixe">💡</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Magneto_ojDl.jpg" alt="Magnéto" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:linear-gradient(135deg, #3ce1ff, #1affff, #19ffff, #e6ec18, #ffba09)"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Magnéto</span>
+    <span class="scene-card-badge dynamic" title="Scénario dynamique">🌈</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"><div class="scene-card-dot" style="width:11px;height:11px;background:#3ce1ff"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#1affff"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#19ffff"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#e6ec18"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ffba09"></div></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Malibu_pink_ojDl.jpg" alt="Malibu pink" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:linear-gradient(135deg, #ff5b46, #ff4dfb, #ff43ff, #22e4ff, #5082ff)"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Malibu pink</span>
+    <span class="scene-card-badge dynamic" title="Scénario dynamique">🌈</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"><div class="scene-card-dot" style="width:11px;height:11px;background:#ff5b46"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff4dfb"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff43ff"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#22e4ff"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#5082ff"></div></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Miami_ojDl.jpg" alt="Miami" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:linear-gradient(135deg, #ff8023, #ff6132, #ff3782, #5ed3ff, #0fffff)"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Miami</span>
+    <span class="scene-card-badge dynamic" title="Scénario dynamique">🌈</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"><div class="scene-card-dot" style="width:11px;height:11px;background:#ff8023"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff6132"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff3782"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#5ed3ff"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#0fffff"></div></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Rio_ojDl.jpg" alt="Rio" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:linear-gradient(135deg, #ff4eff, #ff2d86, #ff4c75, #ff7f22, #ffbd15)"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Rio</span>
+    <span class="scene-card-badge dynamic" title="Scénario dynamique">🌈</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"><div class="scene-card-dot" style="width:11px;height:11px;background:#ff4eff"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff2d86"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff4c75"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff7f22"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ffbd15"></div></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Rouge_gorge_ojDl.jpg" alt="Rougegorge d'automne" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:linear-gradient(135deg, #fcae47, #ffa82a, #ffa10b, #ff920f, #ff6904)"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Rougegorge d'automne</span>
+    <span class="scene-card-badge dynamic" title="Scénario dynamique">🌈</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"><div class="scene-card-dot" style="width:11px;height:11px;background:#fcae47"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ffa82a"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ffa10b"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff920f"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff6904"></div></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Soho_ojDl.jpg" alt="Soho" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:linear-gradient(135deg, #ff0a60, #ff692f, #ff3e7d, #ff09ff, #1cd597)"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Soho</span>
+    <span class="scene-card-badge dynamic" title="Scénario dynamique">🌈</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"><div class="scene-card-dot" style="width:11px;height:11px;background:#ff0a60"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff692f"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff3e7d"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff09ff"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#1cd597"></div></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Sommeil_ojDl.jpg" alt="Sommeil" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:linear-gradient(135deg, #bd0f05, #b21409, #991f05, #812805, #703006)"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Sommeil</span>
+    <span class="scene-card-badge dynamic" title="Scénario dynamique">🌈</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"><div class="scene-card-dot" style="width:11px;height:11px;background:#bd0f05"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#b21409"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#991f05"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#812805"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#703006"></div></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Starlight_ojDl.jpg" alt="Starlight" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:linear-gradient(135deg, #59331b, #5e3029, #602d48, #5f288d, #4628ff)"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Starlight</span>
+    <span class="scene-card-badge dynamic" title="Scénario dynamique">🌈</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"><div class="scene-card-dot" style="width:11px;height:11px;background:#59331b"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#5e3029"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#602d48"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#5f288d"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#4628ff"></div></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Tokyo_ojDl.jpg" alt="Tokyo" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:linear-gradient(135deg, #9801ff, #1487ff, #ff04ff, #ff0746, #e55103)"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Tokyo</span>
+    <span class="scene-card-badge dynamic" title="Scénario dynamique">🌈</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"><div class="scene-card-dot" style="width:11px;height:11px;background:#9801ff"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#1487ff"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff04ff"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff0746"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#e55103"></div></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Ville_de_lamour_ojDl.jpg" alt="Ville de l'amour" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:linear-gradient(135deg, #4f00ff, #2658ff, #0f89ff, #ff3d07, #c25805)"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Ville de l'amour</span>
+    <span class="scene-card-badge dynamic" title="Scénario dynamique">🌈</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"><div class="scene-card-dot" style="width:11px;height:11px;background:#4f00ff"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#2658ff"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#0f89ff"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff3d07"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#c25805"></div></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Concentration_ojDl.jpg" alt="Concentration" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:#1a1a1a"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Concentration</span>
+    <span class="scene-card-badge fixed" title="Scénario fixe">💡</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Veilleuse_ojDl.jpg" alt="Veilleuse" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:#1a1a1a"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Veilleuse</span>
+    <span class="scene-card-badge fixed" title="Scénario fixe">💡</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"></div>
+    </div>
+  </div><div class="scene-card">
+    <img class="scene-card-img" src="Lumieres_files/Suzuka_ojDl.jpg" alt="Suzuka" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="scene-card-gradient" style="display:none;background:linear-gradient(135deg, #8838ff, #ed79ff, #ff7cb2, #ffa9a4, #ddd26c)"></div>
+    <div class="scene-card-overlay"></div>
+    <span class="scene-card-name">Suzuka</span>
+    <span class="scene-card-badge fixed" title="Scénario fixe">💡</span>
+    <div class="scene-card-bottom">
+      <div class="scene-card-dots"><div class="scene-card-dot" style="width:11px;height:11px;background:#8838ff"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ed79ff"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ff7cb2"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ffa9a4"></div><div class="scene-card-dot" style="width:11px;height:11px;background:#ddd26c"></div></div>
+    </div>
+  </div></div>
   </div>
 </main>
 
 <div class="footer-bar">
-  <span class="footer-info" id="footer-info">Aucune modification</span>
+  <span class="footer-info modified" id="footer-info">Modifications non sauvegardées</span>
   <div class="footer-actions">
     <button class="btn" onclick="cancelChanges()"><i class="ti ti-x"></i> Annuler</button>
     <button class="btn primary" onclick="showSaveModal()"><i class="ti ti-device-floppy"></i> Sauvegarder</button>
@@ -250,7 +990,8 @@ const SCENE_IMAGE_MAP = {
   "Tokyo":                        "Tokyo.jpg",
   "Ville de l'amour":             "Ville_de_lamour.jpg",
   "Concentration":                "Concentration.jpg",
-  "Veilleuse":                    "Veilleuse.jpg"
+  "Veilleuse":                    "Veilleuse.jpg",
+  "Suzuka":                       "Suzuka.jpg"
 };
 
 function sceneImageUrl(name) {
@@ -308,9 +1049,9 @@ function renderSceneCard(scene) {
   return `<div class="scene-card">
     ${mediaHtml}
     <div class="scene-card-overlay"></div>
-    ${isDynamic ? '<span class="scene-card-badge">dynamique</span>' : ''}
+    <span class="scene-card-name">${scene.name}</span>
+    <span class="scene-card-badge ${isDynamic?'dynamic':'fixed'}" title="${isDynamic?'Scénario dynamique':'Scénario fixe'}">${isDynamic?'🌈':'💡'}</span>
     <div class="scene-card-bottom">
-      <span class="scene-card-name">${scene.name}</span>
       <div class="scene-card-dots">${dotsHtml}</div>
     </div>
   </div>`;
@@ -325,6 +1066,100 @@ function renderSelectThumb(sceneName) {
   const grad = colorGradient(info.colors);
   return `<div class="select-thumb-gradient" style="background:${grad}"></div>`;
 }
+
+function renderSceneDots(colors, forOption=false) {
+  if (!colors || !colors.length) return '<div class="' + (forOption?'custom-select-option-dots':'custom-select-dots') + '"></div>';
+  const cls = forOption ? 'custom-select-option-dot' : 'custom-select-dot';
+  const wrapCls = forOption ? 'custom-select-option-dots' : 'custom-select-dots';
+  const dots = colors.slice(0,5).map(c => `<span class="${cls}" style="background:${c}"></span>`).join('');
+  return `<div class="${wrapCls}">${dots}</div>`;
+}
+
+function renderCustomSelect(roomName, styleId, idx, currentScene) {
+  const uid = `cs_${roomName.replace(/\s+/g,'_')}_${styleId}_${idx}`;
+  const info = getSceneInfo(currentScene);
+  const imgUrl = sceneImageUrl(currentScene);
+
+  let thumbHtml;
+  if (imgUrl) {
+    thumbHtml = `<img class="custom-select-option-thumb" src="${imgUrl}" onerror="this.style.display='none'">`;
+  } else {
+    thumbHtml = `<div class="custom-select-option-thumb-grad" style="background:${colorGradient(info.colors)}"></div>`;
+  }
+
+  const options = knownScenes.map(s => {
+    const si = s;
+    const iurl = sceneImageUrl(si.name);
+    const sel = si.name === currentScene ? ' selected' : '';
+    let optThumb;
+    if (iurl) {
+      optThumb = `<img class="custom-select-option-thumb" src="${iurl}" onerror="this.style.display='none'">`;
+    } else {
+      optThumb = `<div class="custom-select-option-thumb-grad" style="background:${colorGradient(si.colors)}"></div>`;
+    }
+    const dotHtml = renderSceneDots(si.colors, true);
+    return `<div class="custom-select-option${sel}" onclick="customSelectPick('${uid}','${roomName}','${styleId}',${idx},'${si.name.replace(/'/g,"\\'")}',this)">
+      ${optThumb}
+      ${dotHtml}
+      <span>${si.name}</span>
+    </div>`;
+  }).join('');
+
+  return `<div class="custom-select-wrap" id="${uid}">
+    <div class="custom-select-btn" onclick="toggleCustomSelect('${uid}')">
+      ${thumbHtml}
+      ${renderSceneDots(info.colors, false)}
+      <span class="custom-select-label">${currentScene}</span>
+      <span class="custom-select-caret">▾</span>
+    </div>
+    <div class="custom-select-dropdown">${options}</div>
+  </div>`;
+}
+
+function toggleCustomSelect(uid) {
+  const wrap = document.getElementById(uid);
+  const isOpen = wrap.classList.contains('open');
+  // Fermer tous les autres
+  document.querySelectorAll('.custom-select-wrap.open').forEach(el => {
+    if (el.id !== uid) el.classList.remove('open');
+  });
+  if (isOpen) {
+    wrap.classList.remove('open');
+  } else {
+    wrap.classList.add('open');
+    // Scroll vers option sélectionnée
+    const sel = wrap.querySelector('.custom-select-option.selected');
+    if (sel) setTimeout(() => sel.scrollIntoView({block:'nearest'}), 50);
+  }
+}
+
+function customSelectPick(uid, roomName, styleId, idx, sceneName, optEl) {
+  setScene(roomName, styleId, idx, sceneName);
+  const wrap = document.getElementById(uid);
+  // MAJ option sélectionnée
+  wrap.querySelectorAll('.custom-select-option').forEach(el => el.classList.remove('selected'));
+  optEl.classList.add('selected');
+  // MAJ bouton
+  const btn = wrap.querySelector('.custom-select-btn');
+  const imgUrl = sceneImageUrl(sceneName);
+  const info = getSceneInfo(sceneName);
+  let thumbHtml;
+  if (imgUrl) {
+    thumbHtml = `<img class="custom-select-option-thumb" src="${imgUrl}" onerror="this.style.display='none'">`;
+  } else {
+    thumbHtml = `<div class="custom-select-option-thumb-grad" style="background:${colorGradient(info.colors)}"></div>`;
+  }
+  btn.innerHTML = thumbHtml + renderSceneDots(info.colors, false) +
+    `<span class="custom-select-label">${sceneName}</span><span class="custom-select-caret">▾</span>`;
+  wrap.classList.remove('open');
+}
+
+// Fermer dropdowns au clic extérieur
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.custom-select-wrap')) {
+    document.querySelectorAll('.custom-select-wrap.open').forEach(el => el.classList.remove('open'));
+  }
+});
 
 function render() {
   modified = JSON.stringify(currentConfig) !== JSON.stringify(originalConfig);
@@ -354,19 +1189,11 @@ function render() {
 
           const selects = [0,1,2].map(idx => {
             const cur = roomScenes[idx] || style.scenes[idx] || 'Lumineux';
-            const opts = knownScenes.map(s =>
-              `<option value="${s.name}"${s.name===cur?' selected':''}>${s.name}</option>`
-            ).join('');
-            return `<div class="scene-select-wrap">
-              ${renderSelectThumb(cur)}
-              <select class="scene-select" onchange="setScene('${roomName}','${style.id}',${idx},this.value);updateThumb(this)">
-                ${opts}
-              </select>
-            </div>`;
+            return renderCustomSelect(roomName, style.id, idx, cur);
           }).join('');
 
           return `<div class="style-row">
-            <span class="style-label">${style.label}</span>
+            <span class="style-label">${{'energique':'⚡','dansant':'💃','calme':'🌙','acoustique':'🎸','festif':'🎉','melancolique':'🌧','instrumental':'🎼','defaut':'✨'}[style.id]||''} ${style.label}</span>
             <div class="style-scenes">${selects}</div>
           </div>`;
         }).join('');
@@ -468,5 +1295,7 @@ function showToast(msg, isError=false) {
 
 loadConfig();
 </script>
-</body>
-</html>
+<script defer="defer" src="Lumieres_files/v833ccba57c9e4d2798f2e76cebdd09a11778172276447_ojDl" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;84b74fa937e142fdbe3654b5c7a436c8&quot;,&quot;r&quot;:1,&quot;server_timing&quot;:{&quot;name&quot;:{&quot;cfCacheStatus&quot;:true,&quot;cfEdge&quot;:true,&quot;cfExtPri&quot;:true,&quot;cfL4&quot;:true,&quot;cfOrigin&quot;:true,&quot;cfSpeedBrain&quot;:true},&quot;location_startswith&quot;:null}}" crossorigin="anonymous"></script>
+
+
+</body></html>
