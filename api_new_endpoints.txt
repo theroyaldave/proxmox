@@ -1,0 +1,190 @@
+
+        elif parsed.path == '/upload-scene-image':
+            import os as _os
+            try:
+                import re as _re
+                ctype = self.headers.get('Content-Type', '')
+                length = int(self.headers.get('Content-Length', 0))
+                body = self.rfile.read(length)
+                boundary_m = _re.search(r'boundary=(.+)', ctype)
+                if not boundary_m:
+                    raise Exception('No boundary')
+                boundary = ('--' + boundary_m.group(1).strip()).encode()
+                parts = body.split(boundary)
+                saved = None
+                for part in parts:
+                    if b'filename=' not in part:
+                        continue
+                    fname_m = _re.search(rb'filename="([^"]+)"', part)
+                    if not fname_m:
+                        continue
+                    fname = fname_m.group(1).decode('utf-8', errors='replace')
+                    sep = part.find(b'\r\n\r\n')
+                    if sep == -1:
+                        continue
+                    file_data = part[sep+4:]
+                    if file_data.endswith(b'\r\n'):
+                        file_data = file_data[:-2]
+                    safe_name = _re.sub(r'[^a-zA-Z0-9._-]', '_', fname)
+                    dest = '/var/www/snapcast-ui/hue-scenes/' + safe_name
+                    with open(dest, 'wb') as f:
+                        f.write(file_data)
+                    saved = safe_name
+                    break
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({'status': 'ok', 'filename': saved}).encode())
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({'status': 'error', 'message': str(e)}).encode())
+
+        elif parsed.path == '/create-custom-scene':
+            length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(length)
+            try:
+                import ssl, urllib.request as ur
+                data = json.loads(body)
+                scene_name = data.get('name', '').strip()
+                colors_hex = data.get('colors', [])
+                speed = float(data.get('speed', 0.5))
+                image_file = data.get('image_file', '')
+                if not scene_name:
+                    raise Exception('Nom de scenario requis')
+                if not colors_hex:
+                    raise Exception('Au moins une couleur requise')
+                cfg = json.load(open('/var/www/snapcast-ui/hue-config.json'))
+                bridge = cfg.get('bridge', '192.168.2.70')
+                token = cfg.get('token', '')
+                ctx = ssl.create_default_context()
+                ctx.check_hostname = False
+                ctx.verify_mode = ssl.CERT_NONE
+                def hex_to_rgb(h):
+                    h = h.lstrip('#')
+                    return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+                def rgb_to_xy(r, g, b):
+                    r, g, b = r/255.0, g/255.0, b/255.0
+                    r = ((r+0.055)/1.055)**2.4 if r > 0.04045 else r/12.92
+                    g = ((g+0.055)/1.055)**2.4 if g > 0.04045 else g/12.92
+                    b = ((b+0.055)/1.055)**2.4 if b > 0.04045 else b/12.92
+                    X = r*0.664511 + g*0.154324 + b*0.162028
+                    Y = r*0.283881 + g*0.668433 + b*0.047685
+                    Z = r*0.000088 + g*0.072310 + b*0.986039
+                    total = X+Y+Z
+                    if total == 0: return {'x': 0.0, 'y': 0.0}
+                    return {'x': round(X/total,4), 'y': round(Y/total,4)}
+                palette_colors = []
+                for hx in colors_hex:
+                    try:
+                        r,g,b = hex_to_rgb(hx)
+                        xy = rgb_to_xy(r,g,b)
+                        palette_colors.append({'color': {'xy': xy}, 'dimming': {'brightness': 100.0}})
+                    except: pass
+                if not palette_colors:
+                    raise Exception('Couleurs invalides')
+                clean_palette = {'color': palette_colors, 'dimming': [{'brightness': 100.0}], 'color_temperature': []}
+                req_lights = ur.Request(f'https://{bridge}/clip/v2/resource/light', headers={'hue-application-key': token})
+                all_lights = json.loads(ur.urlopen(req_lights, context=ctx, timeout=10).read()).get('data', [])
+                req_rooms = ur.Request(f'https://{bridge}/clip/v2/resource/room', headers={'hue-application-key': token})
+                all_rooms = json.loads(ur.urlopen(req_rooms, context=ctx, timeout=10).read()).get('data', [])
+                def get_room_light_ids(room_id):
+                    room = next((r for r in all_rooms if r['id'] == room_id), None)
+                    if not room: return []
+                    device_ids = {c['rid'] for c in room.get('children', []) if c['rtype'] == 'device'}
+                    return [l['id'] for l in all_lights if l.get('owner', {}).get('rid') in device_ids]
+                created = []
+                errors = []
+                for room_name, room_cfg in cfg.get('rooms', {}).items():
+                    if not room_cfg.get('enabled', True): continue
+                    room_id = room_cfg.get('hue_room_id', '')
+                    if not room_id: continue
+                    light_ids = get_room_light_ids(room_id)
+                    if not light_ids:
+                        errors.append(f'{room_name}: aucune lumiere')
+                        continue
+                    actions = []
+                    for i, lid in enumerate(light_ids):
+                        ce = palette_colors[i % len(palette_colors)]
+                        actions.append({'target': {'rid': lid, 'rtype': 'light'}, 'action': {'on': {'on': True}, 'color': ce['color'], 'dimming': ce['dimming']}})
+                    payload = json.dumps({'metadata': {'name': scene_name}, 'group': {'rid': room_id, 'rtype': 'room'}, 'actions': actions, 'palette': clean_palette, 'speed': speed, 'auto_dynamic': True}).encode()
+                    req2 = ur.Request(f'https://{bridge}/clip/v2/resource/scene', data=payload, headers={'hue-application-key': token, 'Content-Type': 'application/json'}, method='POST')
+                    try:
+                        result = json.loads(ur.urlopen(req2, context=ctx, timeout=10).read())
+                        if result.get('data'): created.append(room_name)
+                        else: errors.append(f'{room_name}: {result.get("errors")}')
+                    except Exception as e2:
+                        errors.append(f'{room_name}: {str(e2)}')
+                custom_path = '/var/www/snapcast-ui/custom-scenes.json'
+                try: custom = json.load(open(custom_path))
+                except: custom = {'scenes': []}
+                custom['scenes'] = [s for s in custom['scenes'] if s['name'] != scene_name]
+                custom['scenes'].append({'name': scene_name, 'colors': colors_hex, 'speed': speed, 'image_file': image_file, 'mode': 'dynamic_palette'})
+                with open(custom_path, 'w') as f: json.dump(custom, f, indent=2, ensure_ascii=False)
+                known = cfg.get('known_scenes', [])
+                known = [s for s in known if s['name'] != scene_name]
+                known.append({'name': scene_name, 'colors': colors_hex, 'mode': 'dynamic_palette'})
+                cfg['known_scenes'] = known
+                with open('/var/www/snapcast-ui/hue-config.json', 'w') as f: json.dump(cfg, f, indent=2, ensure_ascii=False)
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({'status': 'ok', 'created': created, 'errors': errors, 'scene_name': scene_name}).encode())
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({'status': 'error', 'message': str(e)}).encode())
+
+        elif parsed.path == '/delete-custom-scene':
+            length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(length)
+            try:
+                import ssl, urllib.request as ur, os as _os
+                data = json.loads(body)
+                scene_name = data.get('name', '').strip()
+                if not scene_name: raise Exception('Nom requis')
+                cfg = json.load(open('/var/www/snapcast-ui/hue-config.json'))
+                bridge = cfg.get('bridge', '192.168.2.70')
+                token = cfg.get('token', '')
+                ctx = ssl.create_default_context()
+                ctx.check_hostname = False
+                ctx.verify_mode = ssl.CERT_NONE
+                req = ur.Request(f'https://{bridge}/clip/v2/resource/scene', headers={'hue-application-key': token})
+                all_scenes = json.loads(ur.urlopen(req, context=ctx, timeout=10).read()).get('data', [])
+                deleted = 0
+                for s in all_scenes:
+                    if s['metadata']['name'] == scene_name:
+                        try:
+                            req_del = ur.Request(f'https://{bridge}/clip/v2/resource/scene/{s["id"]}', headers={'hue-application-key': token}, method='DELETE')
+                            ur.urlopen(req_del, context=ctx, timeout=10)
+                            deleted += 1
+                        except: pass
+                custom_path = '/var/www/snapcast-ui/custom-scenes.json'
+                try:
+                    custom = json.load(open(custom_path))
+                    image_file = next((s.get('image_file','') for s in custom['scenes'] if s['name']==scene_name), '')
+                    custom['scenes'] = [s for s in custom['scenes'] if s['name'] != scene_name]
+                    with open(custom_path, 'w') as f: json.dump(custom, f, indent=2, ensure_ascii=False)
+                    if image_file:
+                        img_path = '/var/www/snapcast-ui/hue-scenes/' + image_file
+                        if _os.path.exists(img_path): _os.remove(img_path)
+                except: pass
+                cfg['known_scenes'] = [s for s in cfg.get('known_scenes',[]) if s['name'] != scene_name]
+                with open('/var/www/snapcast-ui/hue-config.json', 'w') as f: json.dump(cfg, f, indent=2, ensure_ascii=False)
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({'status': 'ok', 'deleted': deleted}).encode())
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({'status': 'error', 'message': str(e)}).encode())
