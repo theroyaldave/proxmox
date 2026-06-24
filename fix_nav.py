@@ -1,50 +1,83 @@
-import re
+# fix_nav.py — aligne les headers de plan.html et groups.html sur le style lumieres.html
 
-NAV = '<a href="https://snapcast.theroyaldave.fr/" class="btn{0}" title="Vue liste" style="padding:8px 12px;font-size:16px"><i class="ti ti-list"></i></a><a href="https://snapcast.theroyaldave.fr/plan.html" class="btn{1}" title="Plan" style="padding:8px 12px;font-size:16px"><i class="ti ti-map-2"></i></a><a href="https://snapcast.theroyaldave.fr/groups.html" class="btn{2}" title="Groupes" style="padding:8px 12px;font-size:16px"><i class="ti ti-stack"></i></a><a href="https://snapcast.theroyaldave.fr/lumieres.html" class="btn{3}" title="Lumieres" style="padding:8px 12px;font-size:16px"><i class="ti ti-bulb"></i></a>'
+BASE = 'https://snapcast.theroyaldave.fr'
 
 PRIMARY_CSS = '.btn.primary{background:#1d9e75;border-color:#1d9e75;color:#fff}'
 
-pages = {
-    'index.html':    (' primary', '', '', ''),
-    'plan.html':     ('', ' primary', '', ''),
-    'groups.html':   ('', '', ' primary', ''),
-    'lumieres.html': ('', '', '', ' primary'),
+def make_nav(active):
+    pages = [
+        ('/', 'ti-list', 'Vue liste'),
+        ('/plan.html', 'ti-map-2', 'Plan'),
+        ('/groups.html', 'ti-stack', 'Groupes'),
+        ('/lumieres.html', 'ti-bulb', 'Lumieres'),
+    ]
+    out = ''
+    for href, icon, title in pages:
+        cls = 'btn primary' if href == active else 'btn'
+        out += f'<a href="{BASE}{href}" class="{cls}" title="{title}" style="padding:8px 12px;font-size:16px"><i class="ti ti-{icon}"></i></a>'
+    return out
+
+def make_header(logo_icon, active):
+    nav = make_nav(active)
+    return f'''<header>
+  <div class="header-inner">
+  <div class="header-left">
+    <i class="ti ti-{logo_icon} logo"></i>
+    <h1>Snapcast</h1>
+    <div class="status">
+      <div class="status-dot" id="status-dot"></div>
+      <span id="status-txt"></span>
+    </div>
+  </div>
+  <div class="header-right">
+    {nav}
+    <button class="btn" onclick="location.reload()" title="Actualiser" style="padding:8px 12px;font-size:16px"><i class="ti ti-refresh"></i></button>
+  </div>
+  </div>
+</header>'''
+
+HEADER_CSS = '''header{background:#111;border-bottom:1px solid #222;flex-shrink:0}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;max-width:1200px;margin:0 auto;width:100%}
+.header-left{display:flex;align-items:center;gap:12px}
+.header-right{display:flex;align-items:center;gap:8px}
+.btn{-webkit-appearance:none;appearance:none;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#ccc;cursor:pointer;font-size:12px;padding:6px 12px;display:flex;align-items:center;gap:5px;font-family:inherit;text-decoration:none}
+.btn:hover{background:#222;border-color:#444}
+.btn.primary{background:#1d9e75;border-color:#1d9e75;color:#fff}'''
+
+import re
+
+files = {
+    'plan.html':   ('brand-spotify', '/plan.html'),
+    'groups.html': ('stack', '/groups.html'),
 }
 
-patterns = [
-    re.compile(r'<a href="https?://snapcast\.theroyaldave\.fr/plan\.html"[^>]*>.*?ti-map.*?</a>.{0,200}?<a href="[^"]*lumieres\.html"[^>]*>.*?ti-bulb.*?</a>', re.DOTALL),
-    re.compile(r'<a href="[^"]*" class="btn"[^>]*>.*?ti-list.*?</a>.{0,300}?<a href="[^"]*" class="btn"[^>]*>.*?ti-map.*?</a>', re.DOTALL),
-    re.compile(r'<a href="https?://snapcast\.theroyaldave\.fr/"[^>]*>.*?ti-list.*?</a>.{0,200}?<a href="[^"]*lumieres\.html"[^>]*>.*?ti-bulb.*?</a>', re.DOTALL),
-]
-
-for fname, active in pages.items():
+for fname, (logo, active) in files.items():
     path = f'/var/www/snapcast-ui/{fname}'
-    try:
-        with open(path, 'r') as f:
-            c = f.read()
-    except:
-        print(f'{fname}: fichier introuvable')
-        continue
+    with open(path, 'r') as f:
+        c = f.read()
 
-    nav = NAV.format(*active)
-    replaced = False
+    # Remplacer le bloc header CSS
+    old_css_patterns = [
+        r'header\{display:flex[^}]+\}',
+        r'\.header-left\{[^}]+\}',
+        r'\.header-right\{[^}]+\}',
+        r'\.btn\{[^}]+\}',
+        r'\.btn:hover\{[^}]+\}',
+        r'\.btn\.primary\{[^}]+\}',
+    ]
+    # Supprimer les anciennes regles CSS header
+    for pat in old_css_patterns:
+        c = re.sub(pat, '', c)
 
-    for i, pat in enumerate(patterns):
-        new_c, n = pat.subn(nav, c)
-        if n > 0:
-            c = new_c
-            replaced = True
-            print(f'{fname}: nav OK (pattern {i})')
-            break
+    # Injecter le nouveau CSS apres </style> ouvrante ou avant </style>
+    c = c.replace('</style>', HEADER_CSS + '\n</style>', 1)
 
-    if not replaced:
-        print(f'{fname}: pattern non trouve')
-
-    if '.btn.primary' not in c and '.btn{' in c:
-        c = c.replace('.btn:hover{', PRIMARY_CSS + '.btn:hover{')
-        print(f'{fname}: primary CSS ajoute')
+    # Remplacer le bloc <header>...</header>
+    new_header = make_header(logo, active)
+    c = re.sub(r'<header>.*?</header>', new_header, c, flags=re.DOTALL)
 
     with open(path, 'w') as f:
         f.write(c)
+    print(f'{fname}: OK')
 
 print('Termine')
