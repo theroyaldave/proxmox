@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RD Cache Checker</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; padding: 2rem; }
+  h1 { font-size: 18px; font-weight: 500; margin-bottom: 1.5rem; }
+  .config { display: flex; gap: 8px; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: flex-end; }
+  .config label { font-size: 13px; color: #666; display: block; margin-bottom: 4px; }
+  .config-field { flex: 1; min-width: 200px; }
+  input[type=text] { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; background: #fff; }
+  input[type=text]:focus { outline: none; border-color: #4a90e2; }
+  button { padding: 8px 18px; border: 1px solid #ccc; border-radius: 6px; background: #fff; font-size: 14px; cursor: pointer; white-space: nowrap; }
+  button:hover { background: #f0f0f0; }
+  button:disabled { opacity: 0.4; cursor: default; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 1.5rem; }
+  .stat { background: #fff; border-radius: 8px; padding: 12px 16px; border: 1px solid #eee; }
+  .stat-label { font-size: 12px; color: #888; margin-bottom: 4px; }
+  .stat-val { font-size: 22px; font-weight: 500; }
+  .stat-val.green { color: #2d8a4e; }
+  .stat-val.red { color: #c0392b; }
+  .section-title { font-size: 13px; font-weight: 500; color: #666; margin-bottom: 8px; }
+  .movie-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; flex-wrap: wrap; background: #fff; padding: 10px 12px; margin-bottom: 2px; border-radius: 6px; }
+  .movie-row.cached-row { border-left: 3px solid #2d8a4e; }
+  .movie-year { color: #999; font-size: 13px; min-width: 36px; }
+  .movie-title { flex: 1; min-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 500; min-width: 90px; text-align: center; }
+  .badge-cached { background: #d4edda; color: #155724; }
+  .badge-notcached { background: #f8d7da; color: #721c24; }
+  .badge-loading { background: #f0f0f0; color: #888; }
+  .badge-noreleases { background: #fff3cd; color: #856404; }
+  .grab-btn { font-size: 12px; padding: 4px 10px; cursor: pointer; border-radius: 4px; border: 1px solid #4a90e2; background: transparent; color: #4a90e2; }
+  .grab-btn:hover { background: #e8f0fb; }
+  .grab-btn:disabled { opacity: 0.4; cursor: default; }
+  select { font-size: 12px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 4px; max-width: 280px; background: #fff; }
+  #log { font-size: 12px; color: #888; margin: 8px 0; min-height: 18px; }
+  .err { font-size: 13px; color: #c0392b; margin: 8px 0; }
+  #results { margin-top: 1rem; }
+</style>
+</head>
+<body>
+
+<h1>RD Cache Checker</h1>
+
+<div class="config">
+  <div class="config-field">
+    <label>URL proxy</label>
+    <input type="text" id="proxy-url" value="https://rdproxy.theroyaldave.fr">
+  </div>
+  <button id="btn-scan" onclick="startScan()">Analyser</button>
+</div>
+
+<div id="error" class="err"></div>
+<div id="log"></div>
+
+<div class="stats" id="stats" style="display:none">
+  <div class="stat"><div class="stat-label">Films analysés</div><div class="stat-val" id="s-total">0</div></div>
+  <div class="stat"><div class="stat-label">En cache RD</div><div class="stat-val green" id="s-cached">0</div></div>
+  <div class="stat"><div class="stat-label">Non en cache</div><div class="stat-val red" id="s-notcached">0</div></div>
+  <div class="stat"><div class="stat-label">Sans release</div><div class="stat-val" id="s-noreleases">0</div></div>
+</div>
+
+<div id="results"></div>
+
+<script>
+async function startScan() {
+  const base = document.getElementById('proxy-url').value.trim().replace(/\/$/, '');
+  document.getElementById('error').textContent = '';
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('stats').style.display = 'none';
+  document.getElementById('btn-scan').disabled = true;
+
+  const log = msg => document.getElementById('log').textContent = msg;
+  const err = msg => document.getElementById('error').textContent = msg;
+
+  try {
+    log('Récupération des films manquants...');
+    const res = await fetch(`${base}/movies`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const movies = await res.json();
+
+    log(`${movies.length} films manquants. Analyse des releases...`);
+
+    const resultsEl = document.getElementById('results');
+    resultsEl.innerHTML = `<div class="section-title">${movies.length} films manquants — recherche en cours</div>`;
+
+    for (const m of movies) {
+      const row = document.createElement('div');
+      row.className = 'movie-row';
+      row.id = `row-${m.id}`;
+      row.innerHTML = `
+        <span class="movie-year">${m.year}</span>
+        <span class="movie-title" title="${m.title}">${m.title}</span>
+        <span class="badge badge-loading" id="badge-${m.id}">...</span>
+        <select id="sel-${m.id}" style="display:none"></select>
+        <button class="grab-btn" id="grab-${m.id}" style="display:none" onclick="grab(${m.id},'${base}')">Grab</button>
+      `;
+      resultsEl.appendChild(row);
+    }
+
+    let cached = 0, notcached = 0, noreleases = 0;
+
+    for (const m of movies) {
+      log(`Analyse: ${m.title}...`);
+      try {
+        const rres = await fetch(`${base}/releases?movieId=${m.id}`);
+        const releases = await rres.json();
+
+        const badge = document.getElementById(`badge-${m.id}`);
+        const sel = document.getElementById(`sel-${m.id}`);
+        const btn = document.getElementById(`grab-${m.id}`);
+        const row = document.getElementById(`row-${m.id}`);
+
+        if (!releases.length) {
+          badge.className = 'badge badge-noreleases';
+          badge.textContent = 'aucune release';
+          noreleases++;
+        } else {
+          const cachedR = releases.filter(r => r.cached);
+          if (cachedR.length > 0) {
+            badge.className = 'badge badge-cached';
+            badge.textContent = `${cachedR.length} cached`;
+            row.classList.add('cached-row');
+            sel.style.display = '';
+            btn.style.display = '';
+            cachedR.forEach(r => {
+              const opt = document.createElement('option');
+              opt.value = r.guid;
+              opt.textContent = `${r.quality} — ${(r.size/1e9).toFixed(1)} Go — ${r.indexer}`;
+              sel.appendChild(opt);
+            });
+            cached++;
+          } else {
+            badge.className = 'badge badge-notcached';
+            badge.textContent = 'non caché';
+            notcached++;
+          }
+        }
+      } catch(e) {
+        document.getElementById(`badge-${m.id}`).textContent = 'erreur';
+      }
+
+      document.getElementById('s-total').textContent = cached + notcached + noreleases;
+      document.getElementById('s-cached').textContent = cached;
+      document.getElementById('s-notcached').textContent = notcached;
+      document.getElementById('s-noreleases').textContent = noreleases;
+      document.getElementById('stats').style.display = 'grid';
+    }
+
+    resultsEl.querySelector('.section-title').textContent = `${movies.length} films manquants`;
+    log('Analyse terminée.');
+  } catch(e) {
+    err(e.message);
+    log('');
+  }
+  document.getElementById('btn-scan').disabled = false;
+}
+
+async function grab(movieId, base) {
+  const guid = document.getElementById(`sel-${movieId}`).value;
+  const btn = document.getElementById(`grab-${movieId}`);
+  btn.disabled = true;
+  btn.textContent = '...';
+  try {
+    const res = await fetch(`${base}/grab`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ guid })
+    });
+    if (res.ok) {
+      btn.textContent = 'Envoyé';
+      document.getElementById(`badge-${movieId}`).className = 'badge badge-loading';
+      document.getElementById(`badge-${movieId}`).textContent = 'en cours...';
+    } else {
+      btn.textContent = 'Erreur';
+      btn.disabled = false;
+    }
+  } catch(e) {
+    btn.textContent = 'Erreur';
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
