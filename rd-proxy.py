@@ -2,24 +2,28 @@
 import json
 import urllib.request
 import urllib.error
+import os
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 RADARR_URL = "http://localhost:7878"
 RADARR_KEY = "18be05bc7daf481fa8000b28c6a46dd5"
 RD_KEY = "AGWMLUEMYM7NPZ5PKNL7IO3KVRHWK65GIZ5U5FOJQIPAQJWFN5FA"
 PORT = 7879
+HTML_FILE = "/opt/mediastack/rd-cache-checker.html"
+
+HTML = open(HTML_FILE).read() if os.path.exists(HTML_FILE) else "<h1>rd-cache-checker.html manquant</h1>"
 
 class ProxyHandler(BaseHTTPRequestHandler):
 
     def log_message(self, format, *args):
         print(f"[rd-proxy] {self.path} {args[1] if len(args)>1 else ''}")
 
-    def send_cors(self, code=200):
+    def send_cors(self, code=200, content_type="application/json"):
         self.send_response(code)
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
-        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Type", content_type)
         self.end_headers()
 
     def do_OPTIONS(self):
@@ -44,7 +48,11 @@ class ProxyHandler(BaseHTTPRequestHandler):
                     k, v = p.split("=", 1)
                     params[k] = v
 
-        if path == "/movies":
+        if path == "/rdchecker":
+            self.send_cors(200, "text/html; charset=utf-8")
+            self.wfile.write(HTML.encode())
+
+        elif path == "/movies":
             data = self.fetch(f"{RADARR_URL}/api/v3/movie",
                               headers={"X-Api-Key": RADARR_KEY})
             if isinstance(data, list):
