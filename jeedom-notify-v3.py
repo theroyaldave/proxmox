@@ -29,6 +29,40 @@ SONARR_APIKEY = "0f1cbd43c8f24c22b8163e79ff43e6ce"
 
 SONARR_BUFFER_SECONDS = 15
 
+
+def sanitize_for_speech(text):
+    """Nettoie le texte pour la synthese vocale (Alexa ne supporte pas certains caracteres)"""
+    if not text:
+        return text
+    replacements = {
+        '&': 'et',
+        ':': ',',
+        ';': ',',
+        '"': '',
+        "'": ' ',
+        '/': ' ',
+        '\\': ' ',
+        '*': '',
+        '#': '',
+        '@': '',
+        '%': ' pourcent',
+        '+': ' plus ',
+        '_': ' ',
+        '~': '',
+        '|': ' ',
+        '<': '',
+        '>': '',
+        '[': '',
+        ']': '',
+        '{': '',
+        '}': '',
+    }
+    for old, new in replacements.items():
+        text = text.replace(old, new)
+    # Normaliser les espaces multiples
+    text = ' '.join(text.split())
+    return text
+
 # Buffer pour grouper les episodes Sonarr par serie
 _sonarr_buffer = {}  # series_id -> {"title": str, "episodes": [...], "timer": Timer}
 _sonarr_lock = threading.Lock()
@@ -82,7 +116,7 @@ def flush_sonarr_buffer(series_id):
     if not entry:
         return
 
-    series_title = entry["title"]
+    series_title = sanitize_for_speech(entry["title"])
     episodes = entry["episodes"]
 
     if len(episodes) > 1:
@@ -152,6 +186,7 @@ class Handler(BaseHTTPRequestHandler):
                     title = get_radarr_french_title(movie_id)
                 if not title:
                     title = movie.get('title', 'Film inconnu')
+                title = sanitize_for_speech(title)
 
                 text = f"Le film {title} ({year}) est disponible" if year else f"Le film {title} est disponible"
 
@@ -165,6 +200,7 @@ class Handler(BaseHTTPRequestHandler):
                     series_title = get_sonarr_french_title(series_id)
                 if not series_title:
                     series_title = series.get('title', 'Série inconnue')
+                series_title = sanitize_for_speech(series_title)
 
                 episodes = data.get('episodes', [])
                 if episodes and series_id:
