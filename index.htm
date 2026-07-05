@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snapcast Spotify</title>
+<link rel="stylesheet" href="index_files/tabler-icons.min_a-bo.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+button{-webkit-appearance:none;-moz-appearance:none;appearance:none;font-family:inherit;font-size:inherit}
+html,body{background:#111;color:#e8e8e8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.page-wrapper{display:flex;flex-direction:column;align-items:stretch;min-height:100vh}
+.cover-sidebar{width:200px;display:none;flex-direction:column;gap:12px;padding:1rem;position:fixed;top:60px;left:8px;max-height:calc(100vh - 70px);overflow-y:auto;z-index:50}
+.cover-card{border-radius:12px;overflow:hidden;border:3px solid #333;flex-shrink:0}
+.app{width:100%;max-width:1200px;padding:1rem;min-width:0;margin:0 auto}
+.cover-card img{width:100%;aspect-ratio:1;display:block;object-fit:cover}
+.cover-card .cover-info{padding:10px 12px 12px;background:#1a1a1a}
+.cover-card .cover-stream{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;opacity:.7}
+.cover-card .cover-track{font-size:13px;font-weight:500;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cover-card .cover-artist{font-size:11px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.cover-card .cover-noart{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:#1a1a1a}
+.header-bar{background:#111;border-bottom:1px solid #222;position:sticky;top:0;z-index:100;width:100%;left:0}.header{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;max-width:1200px;margin:0 auto;gap:8px}
+.header-left{display:flex;align-items:center;gap:8px}.status{display:flex;align-items:center;gap:6px}.status-dot{width:7px;height:7px;border-radius:50%;background:#1db954}.status-dot.offline{background:#555}.logo{color:#1db954;font-size:22px}.header h1{font-size:15px;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px}
+.status-bar{display:flex;align-items:center;gap:8px;font-size:13px;color:#888}
+.dot{width:8px;height:8px;border-radius:50%;background:#1d9e75;flex-shrink:0}
+.dot.idle{background:#444}
+.section-label{font-size:11px;font-weight:500;color:#555;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem}
+.rooms-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bar{0%,100%{height:3px}50%{height:14px}}
+.spin{animation:spin 1s linear infinite;display:inline-block}
+@media(max-width:768px){
+  .cover-sidebar{display:none!important}
+}
+@media(max-width:480px){
+  .app{padding:.75rem}
+  .header-left{display:flex;align-items:center;gap:8px}.status{display:flex;align-items:center;gap:6px}.status-dot{width:7px;height:7px;border-radius:50%;background:#1db954}.status-dot.offline{background:#555}.logo{color:#1db954;font-size:22px}.header h1{font-size:15px}
+  .title-full{display:none!important}
+  .title-short{display:inline!important}
+  .rooms-grid{grid-template-columns:1fr}
+}
+.btn{-webkit-appearance:none;appearance:none;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#ccc;cursor:pointer;font-size:16px;padding:8px 12px;display:flex;align-items:center;gap:5px;font-family:inherit;text-decoration:none}.btn:hover{background:#222;border-color:#444}.btn.primary{background:#1d9e75;border-color:#1d9e75;color:#fff}.btn.primary:hover{background:#188562}
+@media(max-width:768px){#streams-bar>div{max-width:calc(100vw - 2rem)!important}#streams-bar div[style*="max-width:300px"]{max-width:150px!important}}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+<div class="header-bar"><div class="header">
+    <div class="header-left">
+      <i class="ti ti-brand-spotify logo"></i>
+      <h1>Snapcast</h1>
+      <div class="status">
+        <div class="status-dot" id="srv-dot" title="connecté" style="background: rgb(29, 158, 117);"></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <a href="https://snapcast.theroyaldave.fr/" class="btn primary" title="Vue liste"><i class="ti ti-list"></i></a><a href="https://snapcast.theroyaldave.fr/plan.html" class="btn" title="Plan"><i class="ti ti-map-2"></i></a><a href="https://snapcast.theroyaldave.fr/groups.html" class="btn" title="Groupes"><i class="ti ti-stack"></i></a><a href="https://snapcast.theroyaldave.fr/lumieres.html" class="btn" title="Lumieres"><i class="ti ti-bulb"></i></a>
+      <button id="spotify-btn" style="display: none; background: rgb(26, 26, 26); border-color: rgb(68, 68, 68); color: rgb(255, 255, 255);" onclick="spotifyAuth()"><i class="ti ti-brand-spotify"></i><span id="spotify-btn-txt">Spotify connecté</span></button><button onclick="location.reload()" title="Actualiser" class="btn"><i class="ti ti-refresh"></i></button>
+    </div>
+  </div></div>
+<div class="cover-sidebar active" id="cover-sidebar" style="display: flex;"><div class="cover-card" style="border-color:#1d9e75"><img src="index_files/ab67616d0000b273546d3d19b4cc6f10eeeec070_a-bo.jpg" alt=""><div class="cover-info"><div class="cover-stream" style="color:#5dcaa5">Cuisine (enceinte)</div><div class="cover-track">volcanoes</div><div class="cover-artist">five fi</div></div></div></div>
+<div class="app">
+  <div style="display:flex;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap">
+    <div style="flex:1;min-width:200px;background:#151515;border:1px solid #2a2a2a;border-radius:10px;padding:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+        <div class="section-label" style="margin-bottom:0">Streams actifs</div>
+        <button id="reboot-lxc03-btn" onclick="rebootLXC03()" title="Redémarrer LXC03 (librespot)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:1px solid #2a2a2a;border-radius:6px;cursor:pointer;padding:3px 8px;color:#555;display:flex;align-items:center;gap:5px;font-size:11px;font-family:inherit"><i id="reboot-lxc03-icon" class="ti ti-refresh" style="font-size:13px"></i><span id="reboot-lxc03-txt">Reboot Streams</span></button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap" id="streams-bar"><div style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:12px;background:#0a1f15;border:1px solid #1d9e75;color:#5dcaa5;max-width:500px;overflow:hidden"><div style="display:flex;align-items:center;gap:6px;max-width:300px;overflow:hidden"><img src="index_files/ab67616d0000b273546d3d19b4cc6f10eeeec070_a-bo.jpg" style="width:20px;height:20px;border-radius:3px;flex-shrink:0"><span style="font-weight:500">Cuisine (enceinte)</span><span style="opacity:0.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;display:inline-block;vertical-align:middle">— volcanoes · five fi</span></div><span style="display:flex;align-items:center;gap:3px;font-size:13px;font-weight:500;opacity:0.85;margin-left:4px"><i class="ti ti-volume" style="font-size:13px"></i>100%</span><div style="position:relative;display:inline-flex;align-items:center"><span id="style-badge-cuisine" onclick="event.stopPropagation();toggleStyleDropdown('cuisine')" style="cursor:pointer;font-size:11px;padding:2px 7px;border-radius:10px;background:rgba(255,255,255,0.08);color:#5dcaa5;margin-left:4px;opacity:0.9;display:inline-flex;align-items:center;gap:3px;user-select:none">🎵 Défaut</span><div id="style-dd-cuisine" style="display:none;position:absolute;top:calc(100% + 4px);left:4px;z-index:999;background:#1e1e1e;border:1px solid #333;border-radius:8px;padding:4px;min-width:170px;box-shadow:0 4px 16px rgba(0,0,0,0.6)"><div onclick="event.stopPropagation();applyStyleOverride('cuisine','energique')" style="cursor:pointer;padding:5px 10px;border-radius:5px;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:#aaa;background:transparent" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'"><span>⚡ Énergique</span></div><div onclick="event.stopPropagation();applyStyleOverride('cuisine','dansant')" style="cursor:pointer;padding:5px 10px;border-radius:5px;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:#aaa;background:transparent" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'"><span>💃 Dansant</span></div><div onclick="event.stopPropagation();applyStyleOverride('cuisine','calme')" style="cursor:pointer;padding:5px 10px;border-radius:5px;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:#aaa;background:transparent" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'"><span>🌙 Calme</span></div><div onclick="event.stopPropagation();applyStyleOverride('cuisine','acoustique')" style="cursor:pointer;padding:5px 10px;border-radius:5px;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:#aaa;background:transparent" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'"><span>🎸 Acoustique</span></div><div onclick="event.stopPropagation();applyStyleOverride('cuisine','festif')" style="cursor:pointer;padding:5px 10px;border-radius:5px;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:#aaa;background:transparent" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'"><span>🎉 Festif</span></div><div onclick="event.stopPropagation();applyStyleOverride('cuisine','melancolique')" style="cursor:pointer;padding:5px 10px;border-radius:5px;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:#aaa;background:transparent" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'"><span>🌧 Mélancolique</span></div><div onclick="event.stopPropagation();applyStyleOverride('cuisine','instrumental')" style="cursor:pointer;padding:5px 10px;border-radius:5px;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:#aaa;background:transparent" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'"><span>🎼 Instrumental</span></div><div onclick="event.stopPropagation();applyStyleOverride('cuisine','defaut')" style="cursor:pointer;padding:5px 10px;border-radius:5px;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:#5dcaa5;background:rgba(255,255,255,0.07)" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='rgba(255,255,255,0.07)'"><span>🎵 Défaut</span></div></div></div><button onclick="resetStream('cuisine')" title="Redémarrer librespot" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;cursor:pointer;padding:0 2px;color:#5dcaa5;opacity:0.6;display:flex;align-items:center"><i id="rst-cuisine" class="ti ti-refresh" style="font-size:12px"></i></button></div></div>
+    </div>
+    <div style="min-width:160px;max-width:220px;background:#151515;border:1px solid #2a2a2a;border-radius:10px;padding:10px;display:none">
+      <div class="section-label" style="margin-bottom:.75rem">Streams Groupés</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap" id="streams-bar-groups"></div>
+    </div>
+  </div>
+  <div style="margin-bottom:.5rem"><div class="section-label">Enceintes → AirPlay / DLNA / RPI <span id="grid-loading" style="font-size: 15px; color: rgb(245, 166, 35); margin-left: 8px; display: none;"><i class="ti ti-settings" style="display:inline-block;animation:spin 2s linear infinite"></i></span></div><div class="rooms-grid" id="grid-sony"><div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:.6rem;opacity:1;overflow:hidden;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:#fff"><img src="index_files/NS410_a-bo.png" style="width:38px;height:38px;object-fit:contain;border-radius:4px;background:#111;padding:2px">Atelier (enceinte)</div><div style="display:flex;align-items:center;gap:6px"><button onclick="activateHue('ca134b93-8951-9f02-b5fd-b5060d5458f0')" title="Activer lumières Hue" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;border-radius:6px;cursor:not-allowed;padding:3px 5px;color:#333;display:flex;align-items:center;opacity:0.4"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hueGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ff0080"></stop><stop offset="25%" style="stop-color:#ff8000"></stop><stop offset="50%" style="stop-color:#ffff00"></stop><stop offset="75%" style="stop-color:#00ff80"></stop><stop offset="100%" style="stop-color:#0080ff"></stop></linearGradient></defs><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.22-1.21 4.16-3 5.2V17a1 1 0 0 1-1 1H10a1 1 0 0 1-1-1v-2.8C7.21 13.16 6 11.22 6 9a6 6 0 0 1 6-6z" stroke="url(#hueGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button><button onclick="rebootDevice('ca134b93-8951-9f02-b5fd-b5060d5458f0')" title="Redémarrer" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;cursor:pointer;padding:2px 4px;color:#555"><i class="ti ti-refresh" style="font-size:15px"></i></button><div title="en ligne" style="width:10px;height:10px;border-radius:50%;background:#1d9e75;flex-shrink:0;box-shadow:0 0 4px #1d9e75"></div></div></div><button onclick="joinStream('ca134b93-8951-9f02-b5fd-b5060d5458f0',null,'cuisine')" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;padding:10px 0;border-radius:8px;font-size:13px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:500;background:#0a1f15;border:1px solid #1d9e75;color:#5dcaa5;opacity:1"><i class="ti ti-player-play" style="font-size:15px;color:#5dcaa5"></i>Rejoindre</button><div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:6px;padding:4px 0"><i class="ti ti-volume" style="font-size:15px;color:#555"></i><button onclick="setOwntoneVolume('ca134b93-8951-9f02-b5fd-b5060d5458f0',-1)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#ccc;cursor:pointer;flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:inherit;font-weight:300">−</button><span style="font-size:14px;color:#ccc;min-width:44px;text-align:center;font-weight:500">24%</span><button onclick="setOwntoneVolume('ca134b93-8951-9f02-b5fd-b5060d5458f0',1)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#ccc;cursor:pointer;flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:inherit;font-weight:300">+</button></div><div style="margin-top:8px"><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#111;border:1px solid #2a2a2a;border-radius:8px"><button onclick="adjustLatency('ca134b93-8951-9f02-b5fd-b5060d5458f0','sony',-50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-minus" style="font-size:15px"></i></button><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;color:#555;font-weight:500;min-width:55px;text-align:center">0s</span></div><button onclick="adjustLatency('ca134b93-8951-9f02-b5fd-b5060d5458f0','sony',50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-plus" style="font-size:15px"></i></button></div></div></div><div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:.6rem;opacity:1;overflow:hidden;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:#fff"><img src="index_files/NS510_a-bo.png" style="width:38px;height:38px;object-fit:contain;border-radius:4px;background:#111;padding:2px">Salle de jeux (enceinte)</div><div style="display:flex;align-items:center;gap:6px"><button onclick="activateHue('016e3537-578f-b2cd-5a37-48ebc1d5a8ea')" title="Activer lumières Hue" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;border-radius:6px;cursor:not-allowed;padding:3px 5px;color:#333;display:flex;align-items:center;opacity:0.4"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hueGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ff0080"></stop><stop offset="25%" style="stop-color:#ff8000"></stop><stop offset="50%" style="stop-color:#ffff00"></stop><stop offset="75%" style="stop-color:#00ff80"></stop><stop offset="100%" style="stop-color:#0080ff"></stop></linearGradient></defs><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.22-1.21 4.16-3 5.2V17a1 1 0 0 1-1 1H10a1 1 0 0 1-1-1v-2.8C7.21 13.16 6 11.22 6 9a6 6 0 0 1 6-6z" stroke="url(#hueGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button><button onclick="rebootDevice('016e3537-578f-b2cd-5a37-48ebc1d5a8ea')" title="Redémarrer" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;cursor:pointer;padding:2px 4px;color:#555"><i class="ti ti-refresh" style="font-size:15px"></i></button><div title="en ligne" style="width:10px;height:10px;border-radius:50%;background:#1d9e75;flex-shrink:0;box-shadow:0 0 4px #1d9e75"></div></div></div><button onclick="joinStream('016e3537-578f-b2cd-5a37-48ebc1d5a8ea',null,'cuisine')" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;padding:10px 0;border-radius:8px;font-size:13px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:500;background:#0a1f15;border:1px solid #1d9e75;color:#5dcaa5;opacity:1"><i class="ti ti-player-play" style="font-size:15px;color:#5dcaa5"></i>Rejoindre</button><div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:6px;padding:4px 0"><i class="ti ti-volume" style="font-size:15px;color:#555"></i><button onclick="setOwntoneVolume('016e3537-578f-b2cd-5a37-48ebc1d5a8ea',-1)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#ccc;cursor:pointer;flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:inherit;font-weight:300">−</button><span style="font-size:14px;color:#ccc;min-width:44px;text-align:center;font-weight:500">20%</span><button onclick="setOwntoneVolume('016e3537-578f-b2cd-5a37-48ebc1d5a8ea',1)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#ccc;cursor:pointer;flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:inherit;font-weight:300">+</button></div><div style="margin-top:8px"><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#111;border:1px solid #2a2a2a;border-radius:8px"><button onclick="adjustLatency('016e3537-578f-b2cd-5a37-48ebc1d5a8ea','sony',-50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-minus" style="font-size:15px"></i></button><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;color:#555;font-weight:500;min-width:55px;text-align:center">0s</span></div><button onclick="adjustLatency('016e3537-578f-b2cd-5a37-48ebc1d5a8ea','sony',50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-plus" style="font-size:15px"></i></button></div></div></div><div style="background:#1a1a1a;border:1px solid #1d9e75;border-radius:12px;padding:.6rem;opacity:1;overflow:hidden;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:#fff"><img src="index_files/NS510_a-bo.png" style="width:38px;height:38px;object-fit:contain;border-radius:4px;background:#111;padding:2px">Cuisine (enceinte)<div style="display:flex;align-items:flex-end;gap:2px;height:14px;margin-left:4px;margin-right:6px"><span style="width:3px;border-radius:1px;background:#1d9e75;animation:bar 0.8s ease-in-out infinite;animation-delay:0s"></span><span style="width:3px;border-radius:1px;background:#1d9e75;animation:bar 0.8s ease-in-out infinite;animation-delay:0.15s"></span><span style="width:3px;border-radius:1px;background:#1d9e75;animation:bar 0.8s ease-in-out infinite;animation-delay:0.3s"></span><span style="width:3px;border-radius:1px;background:#1d9e75;animation:bar 0.8s ease-in-out infinite;animation-delay:0.45s"></span></div></div><div style="display:flex;align-items:center;gap:6px"><button onclick="activateHue('3fa5da3f-8ba3-df55-feb8-c801659364f4')" title="Activer lumières Hue" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;border-radius:6px;cursor:pointer;padding:3px 5px;color:#888;display:flex;align-items:center;opacity:1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hueGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ff0080"></stop><stop offset="25%" style="stop-color:#ff8000"></stop><stop offset="50%" style="stop-color:#ffff00"></stop><stop offset="75%" style="stop-color:#00ff80"></stop><stop offset="100%" style="stop-color:#0080ff"></stop></linearGradient></defs><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.22-1.21 4.16-3 5.2V17a1 1 0 0 1-1 1H10a1 1 0 0 1-1-1v-2.8C7.21 13.16 6 11.22 6 9a6 6 0 0 1 6-6z" stroke="url(#hueGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button><button onclick="rebootDevice('3fa5da3f-8ba3-df55-feb8-c801659364f4')" title="Redémarrer" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;cursor:pointer;padding:2px 4px;color:#555"><i class="ti ti-refresh" style="font-size:15px"></i></button><div title="en ligne" style="width:10px;height:10px;border-radius:50%;background:#1d9e75;flex-shrink:0;box-shadow:0 0 4px #1d9e75"></div></div></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:7px 8px;background:#0d0d0d;border-radius:8px;border:1px solid #222;min-width:0"><img src="index_files/ab67616d0000b273546d3d19b4cc6f10eeeec070_a-bo.jpg" style="width:32px;height:32px;border-radius:4px;flex-shrink:0"><div style="min-width:0;flex:1"><div style="font-size:12px;font-weight:500;color:#e8e8e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">volcanoes</div><div style="font-size:11px;color:#777;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">five fi</div></div></div><button onclick="toggleMute('3fa5da3f-8ba3-df55-feb8-c801659364f4')" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;padding:10px 0;border-radius:8px;font-size:13px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:500;background:#1d9e75;border:1px solid #1d9e75;color:#fff;opacity:1"><i class="ti ti-player-pause" style="font-size:15px;color:#fff"></i>Mettre en pause</button><div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:6px;padding:4px 0"><i class="ti ti-volume" style="font-size:15px;color:#555"></i><button onclick="setOwntoneVolume('3fa5da3f-8ba3-df55-feb8-c801659364f4',-1)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#ccc;cursor:pointer;flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:inherit;font-weight:300">−</button><span style="font-size:14px;color:#ccc;min-width:44px;text-align:center;font-weight:500">30%</span><button onclick="setOwntoneVolume('3fa5da3f-8ba3-df55-feb8-c801659364f4',1)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#ccc;cursor:pointer;flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:inherit;font-weight:300">+</button></div><div style="margin-top:8px"><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#111;border:1px solid #2a2a2a;border-radius:8px"><button onclick="adjustLatency('3fa5da3f-8ba3-df55-feb8-c801659364f4','sony',-50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-minus" style="font-size:15px"></i></button><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;color:#555;font-weight:500;min-width:55px;text-align:center">0s</span></div><button onclick="adjustLatency('3fa5da3f-8ba3-df55-feb8-c801659364f4','sony',50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-plus" style="font-size:15px"></i></button></div></div></div><div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:.6rem;opacity:1;overflow:hidden;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:#fff"><img src="index_files/NS410_a-bo.png" style="width:38px;height:38px;object-fit:contain;border-radius:4px;background:#111;padding:2px">Four à Pain (enceinte)</div><div style="display:flex;align-items:center;gap:6px"><button onclick="rebootDevice('19bea368-d8a7-51ef-bd12-4aec3f8f6ffa')" title="Redémarrer" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;cursor:pointer;padding:2px 4px;color:#555"><i class="ti ti-refresh" style="font-size:15px"></i></button><div title="en ligne" style="width:10px;height:10px;border-radius:50%;background:#1d9e75;flex-shrink:0;box-shadow:0 0 4px #1d9e75"></div></div></div><button onclick="joinStream('19bea368-d8a7-51ef-bd12-4aec3f8f6ffa',null,'cuisine')" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;padding:10px 0;border-radius:8px;font-size:13px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:500;background:#0a1f15;border:1px solid #1d9e75;color:#5dcaa5;opacity:1"><i class="ti ti-player-play" style="font-size:15px;color:#5dcaa5"></i>Rejoindre</button><div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:6px;padding:4px 0"><i class="ti ti-volume" style="font-size:15px;color:#555"></i><button onclick="setOwntoneVolume('19bea368-d8a7-51ef-bd12-4aec3f8f6ffa',-1)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#ccc;cursor:pointer;flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:inherit;font-weight:300">−</button><span style="font-size:14px;color:#ccc;min-width:44px;text-align:center;font-weight:500">25%</span><button onclick="setOwntoneVolume('19bea368-d8a7-51ef-bd12-4aec3f8f6ffa',1)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#ccc;cursor:pointer;flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:inherit;font-weight:300">+</button></div><div style="margin-top:8px"><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#111;border:1px solid #2a2a2a;border-radius:8px"><button onclick="adjustLatency('19bea368-d8a7-51ef-bd12-4aec3f8f6ffa','sony',-50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-minus" style="font-size:15px"></i></button><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;color:#555;font-weight:500;min-width:55px;text-align:center">0s</span></div><button onclick="adjustLatency('19bea368-d8a7-51ef-bd12-4aec3f8f6ffa','sony',50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-plus" style="font-size:15px"></i></button></div></div></div><div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:.6rem;opacity:1;overflow:hidden;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:#fff"><img src="index_files/NS300_a-bo.png" style="width:38px;height:38px;object-fit:contain;border-radius:4px;background:#111;padding:2px">Chambre Parents (enceinte)</div><div style="display:flex;align-items:center;gap:6px"><button onclick="activateHue('4310351e-aa93-5793-7707-dd021425830b')" title="Activer lumières Hue" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;border-radius:6px;cursor:not-allowed;padding:3px 5px;color:#333;display:flex;align-items:center;opacity:0.4"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hueGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ff0080"></stop><stop offset="25%" style="stop-color:#ff8000"></stop><stop offset="50%" style="stop-color:#ffff00"></stop><stop offset="75%" style="stop-color:#00ff80"></stop><stop offset="100%" style="stop-color:#0080ff"></stop></linearGradient></defs><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.22-1.21 4.16-3 5.2V17a1 1 0 0 1-1 1H10a1 1 0 0 1-1-1v-2.8C7.21 13.16 6 11.22 6 9a6 6 0 0 1 6-6z" stroke="url(#hueGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button><button onclick="rebootDevice('4310351e-aa93-5793-7707-dd021425830b')" title="Redémarrer" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;cursor:pointer;padding:2px 4px;color:#555"><i class="ti ti-refresh" style="font-size:15px"></i></button><div title="en ligne" style="width:10px;height:10px;border-radius:50%;background:#1d9e75;flex-shrink:0;box-shadow:0 0 4px #1d9e75"></div></div></div><button onclick="joinStream('4310351e-aa93-5793-7707-dd021425830b',null,'cuisine')" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;padding:10px 0;border-radius:8px;font-size:13px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:500;background:#0a1f15;border:1px solid #1d9e75;color:#5dcaa5;opacity:1"><i class="ti ti-player-play" style="font-size:15px;color:#5dcaa5"></i>Rejoindre</button><div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:6px;padding:4px 0"><i class="ti ti-volume" style="font-size:15px;color:#555"></i><button onclick="setNs300Volume('4310351e-aa93-5793-7707-dd021425830b',-1)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#ccc;cursor:pointer;flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:inherit;font-weight:300">−</button><span style="font-size:14px;color:#ccc;min-width:44px;text-align:center;font-weight:500">29%</span><button onclick="setNs300Volume('4310351e-aa93-5793-7707-dd021425830b',1)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#ccc;cursor:pointer;flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:inherit;font-weight:300">+</button></div><div style="margin-top:8px"><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#111;border:1px solid #2a2a2a;border-radius:8px"><button onclick="adjustLatency('4310351e-aa93-5793-7707-dd021425830b','sony',-50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-minus" style="font-size:15px"></i></button><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;color:#555;font-weight:500;min-width:55px;text-align:center">0s</span></div><button onclick="adjustLatency('4310351e-aa93-5793-7707-dd021425830b','sony',50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-plus" style="font-size:15px"></i></button></div></div></div><div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:.6rem;opacity:1;overflow:hidden;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:#fff"><img src="index_files/NS410_a-bo.png" style="width:38px;height:38px;object-fit:contain;border-radius:4px;background:#111;padding:2px">Chambre Lilian (enceinte)</div><div style="display:flex;align-items:center;gap:6px"><button onclick="activateHue('6eb0e7b9-39fe-67ee-4707-2a121c6e111b')" title="Activer lumières Hue" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;border-radius:6px;cursor:not-allowed;padding:3px 5px;color:#333;display:flex;align-items:center;opacity:0.4"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hueGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ff0080"></stop><stop offset="25%" style="stop-color:#ff8000"></stop><stop offset="50%" style="stop-color:#ffff00"></stop><stop offset="75%" style="stop-color:#00ff80"></stop><stop offset="100%" style="stop-color:#0080ff"></stop></linearGradient></defs><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.22-1.21 4.16-3 5.2V17a1 1 0 0 1-1 1H10a1 1 0 0 1-1-1v-2.8C7.21 13.16 6 11.22 6 9a6 6 0 0 1 6-6z" stroke="url(#hueGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button><button onclick="rebootDevice('6eb0e7b9-39fe-67ee-4707-2a121c6e111b')" title="Redémarrer" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;cursor:pointer;padding:2px 4px;color:#555"><i class="ti ti-refresh" style="font-size:15px"></i></button><div title="en ligne" style="width:10px;height:10px;border-radius:50%;background:#1d9e75;flex-shrink:0;box-shadow:0 0 4px #1d9e75"></div></div></div><button onclick="joinStream('6eb0e7b9-39fe-67ee-4707-2a121c6e111b',null,'cuisine')" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;padding:10px 0;border-radius:8px;font-size:13px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:500;background:#0a1f15;border:1px solid #1d9e75;color:#5dcaa5;opacity:1"><i class="ti ti-player-play" style="font-size:15px;color:#5dcaa5"></i>Rejoindre</button><div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:6px;padding:4px 0"><i class="ti ti-volume" style="font-size:15px;color:#555"></i><button onclick="setOwntoneVolume('6eb0e7b9-39fe-67ee-4707-2a121c6e111b',-1)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#ccc;cursor:pointer;flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:inherit;font-weight:300">−</button><span style="font-size:14px;color:#ccc;min-width:44px;text-align:center;font-weight:500">50%</span><button onclick="setOwntoneVolume('6eb0e7b9-39fe-67ee-4707-2a121c6e111b',1)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#ccc;cursor:pointer;flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:inherit;font-weight:300">+</button></div><div style="margin-top:8px"><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#111;border:1px solid #2a2a2a;border-radius:8px"><button onclick="adjustLatency('6eb0e7b9-39fe-67ee-4707-2a121c6e111b','sony',-50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-minus" style="font-size:15px"></i></button><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;color:#555;font-weight:500;min-width:55px;text-align:center">0s</span></div><button onclick="adjustLatency('6eb0e7b9-39fe-67ee-4707-2a121c6e111b','sony',50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-plus" style="font-size:15px"></i></button></div></div></div><div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:.6rem;opacity:1;overflow:hidden;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:#fff"><img src="index_files/NS410_a-bo.png" style="width:38px;height:38px;object-fit:contain;border-radius:4px;background:#111;padding:2px">Bibliothèque (enceinte)</div><div style="display:flex;align-items:center;gap:6px"><button onclick="rebootDevice('49c944c2-e3da-c460-febb-203a0741e201')" title="Redémarrer" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;cursor:pointer;padding:2px 4px;color:#555"><i class="ti ti-refresh" style="font-size:15px"></i></button><div title="en ligne" style="width:10px;height:10px;border-radius:50%;background:#1d9e75;flex-shrink:0;box-shadow:0 0 4px #1d9e75"></div></div></div><button onclick="joinStream('49c944c2-e3da-c460-febb-203a0741e201',null,'cuisine')" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;padding:10px 0;border-radius:8px;font-size:13px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:500;background:#0a1f15;border:1px solid #1d9e75;color:#5dcaa5;opacity:1"><i class="ti ti-player-play" style="font-size:15px;color:#5dcaa5"></i>Rejoindre</button><div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:6px;padding:4px 0"><i class="ti ti-volume" style="font-size:15px;color:#555"></i><button onclick="setOwntoneVolume('49c944c2-e3da-c460-febb-203a0741e201',-1)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#ccc;cursor:pointer;flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:inherit;font-weight:300">−</button><span style="font-size:14px;color:#ccc;min-width:44px;text-align:center;font-weight:500">30%</span><button onclick="setOwntoneVolume('49c944c2-e3da-c460-febb-203a0741e201',1)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#ccc;cursor:pointer;flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:inherit;font-weight:300">+</button></div><div style="margin-top:8px"><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#111;border:1px solid #2a2a2a;border-radius:8px"><button onclick="adjustLatency('49c944c2-e3da-c460-febb-203a0741e201','sony',-50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-minus" style="font-size:15px"></i></button><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;color:#555;font-weight:500;min-width:55px;text-align:center">0s</span></div><button onclick="adjustLatency('49c944c2-e3da-c460-febb-203a0741e201','sony',50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-plus" style="font-size:15px"></i></button></div></div></div><div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:.6rem;opacity:0.35;overflow:hidden;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:#fff"><i class="ti ti-speakerphone" style="font-size:18px;color:#555"></i>Chambre Thaïs (rpi)</div><div style="display:flex;align-items:center;gap:6px"><button onclick="activateHue('fce87803-8613-471a-218e-a83250f02558')" title="Activer lumières Hue" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;border-radius:6px;cursor:not-allowed;padding:3px 5px;color:#333;display:flex;align-items:center;opacity:0.4"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hueGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ff0080"></stop><stop offset="25%" style="stop-color:#ff8000"></stop><stop offset="50%" style="stop-color:#ffff00"></stop><stop offset="75%" style="stop-color:#00ff80"></stop><stop offset="100%" style="stop-color:#0080ff"></stop></linearGradient></defs><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.22-1.21 4.16-3 5.2V17a1 1 0 0 1-1 1H10a1 1 0 0 1-1-1v-2.8C7.21 13.16 6 11.22 6 9a6 6 0 0 1 6-6z" stroke="url(#hueGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button><div title="hors ligne" style="width:10px;height:10px;border-radius:50%;background:#444;flex-shrink:0;box-shadow:0 0 none"></div></div></div><button onclick="" disabled="disabled" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;padding:10px 0;border-radius:8px;font-size:13px;font-family:inherit;cursor:not-allowed;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:500;background:#222;border:1px solid #333;color:#fff;opacity:0.4"><i class="ti ti-player-play" style="font-size:15px;color:#fff"></i>Hors ligne</button><div style="margin-top:8px"><select onchange="selectOutput('rpi-thais',this.value)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;background:#111;border:1px solid #2a2a2a;border-radius:7px;color:#777;padding:5px 8px;font-size:11px;cursor:pointer;font-family:inherit"><option value="bt" selected="selected">Bluetooth (Echo)</option><option value="jack">Jack</option><option value="hdmi">HDMI</option></select></div><div style="margin-top:8px"><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#111;border:1px solid #2a2a2a;border-radius:8px"><button onclick="adjustLatency('fce87803-8613-471a-218e-a83250f02558','echo',-50)" disabled="disabled" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#333;cursor:not-allowed;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-minus" style="font-size:15px"></i></button><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;color:#555;font-weight:500;min-width:55px;text-align:center">0s</span></div><button onclick="adjustLatency('fce87803-8613-471a-218e-a83250f02558','echo',50)" disabled="disabled" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#333;cursor:not-allowed;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-plus" style="font-size:15px"></i></button></div></div></div><div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:.6rem;opacity:1;overflow:hidden;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:#fff"><i class="ti ti-speakerphone" style="font-size:18px;color:#555"></i>Salle de Bain (rpi)</div><div style="display:flex;align-items:center;gap:6px"><button onclick="rebootDevice('a7ee841b-51eb-5b67-6de1-fba2104f0cdf')" title="Redémarrer" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;cursor:pointer;padding:2px 4px;color:#555"><i class="ti ti-refresh" style="font-size:15px"></i></button><div title="en ligne" style="width:10px;height:10px;border-radius:50%;background:#1d9e75;flex-shrink:0;box-shadow:0 0 4px #1d9e75"></div></div></div><button onclick="joinStream('a7ee841b-51eb-5b67-6de1-fba2104f0cdf','rpi-bain','cuisine')" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;padding:10px 0;border-radius:8px;font-size:13px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:500;background:#0a1f15;border:1px solid #1d9e75;color:#5dcaa5;opacity:1"><i class="ti ti-player-play" style="font-size:15px;color:#5dcaa5"></i>Rejoindre</button><div style="margin-top:8px"><select onchange="selectOutput('rpi-bain',this.value)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;background:#111;border:1px solid #2a2a2a;border-radius:7px;color:#777;padding:5px 8px;font-size:11px;cursor:pointer;font-family:inherit"><option value="bt" selected="selected">Bluetooth (Echo)</option><option value="jack">Jack</option><option value="hdmi">HDMI</option></select></div><div style="margin-top:8px"><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#111;border:1px solid #2a2a2a;border-radius:8px"><button onclick="adjustLatency('a7ee841b-51eb-5b67-6de1-fba2104f0cdf','echo',-50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-minus" style="font-size:15px"></i></button><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;color:#555;font-weight:500;min-width:55px;text-align:center">0s</span></div><button onclick="adjustLatency('a7ee841b-51eb-5b67-6de1-fba2104f0cdf','echo',50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-plus" style="font-size:15px"></i></button></div></div></div><div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:.6rem;opacity:1;overflow:hidden;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:#fff"><i class="ti ti-speakerphone" style="font-size:18px;color:#555"></i>Cuisine (rpi)</div><div style="display:flex;align-items:center;gap:6px"><button onclick="rebootDevice('1efe8146-e7b4-f934-ca31-a98a221f89d6')" title="Redémarrer" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;cursor:pointer;padding:2px 4px;color:#555"><i class="ti ti-refresh" style="font-size:15px"></i></button><div title="en ligne" style="width:10px;height:10px;border-radius:50%;background:#1d9e75;flex-shrink:0;box-shadow:0 0 4px #1d9e75"></div></div></div><button onclick="joinStream('1efe8146-e7b4-f934-ca31-a98a221f89d6','rpi-cuisine','cuisine')" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;padding:10px 0;border-radius:8px;font-size:13px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:500;background:#0a1f15;border:1px solid #1d9e75;color:#5dcaa5;opacity:1"><i class="ti ti-player-play" style="font-size:15px;color:#5dcaa5"></i>Rejoindre</button><div style="margin-top:8px"><select onchange="selectOutput('rpi-cuisine',this.value)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;background:#111;border:1px solid #2a2a2a;border-radius:7px;color:#777;padding:5px 8px;font-size:11px;cursor:pointer;font-family:inherit"><option value="bt" selected="selected">Bluetooth (Echo)</option><option value="jack">Jack</option><option value="hdmi">HDMI</option></select></div><div style="margin-top:8px"><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#111;border:1px solid #2a2a2a;border-radius:8px"><button onclick="adjustLatency('1efe8146-e7b4-f934-ca31-a98a221f89d6','echo',-50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-minus" style="font-size:15px"></i></button><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;color:#555;font-weight:500;min-width:55px;text-align:center">0s</span></div><button onclick="adjustLatency('1efe8146-e7b4-f934-ca31-a98a221f89d6','echo',50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-plus" style="font-size:15px"></i></button></div></div></div><div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:.6rem;opacity:1;overflow:hidden;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:#fff"><i class="ti ti-speakerphone" style="font-size:18px;color:#555"></i>Salon (rpi)</div><div style="display:flex;align-items:center;gap:6px"><button onclick="rebootDevice('d5f5ba1d-27dc-4bb9-08dd-0f53ce33ce71')" title="Redémarrer" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;cursor:pointer;padding:2px 4px;color:#555"><i class="ti ti-refresh" style="font-size:15px"></i></button><div title="en ligne" style="width:10px;height:10px;border-radius:50%;background:#1d9e75;flex-shrink:0;box-shadow:0 0 4px #1d9e75"></div></div></div><button onclick="joinStream('d5f5ba1d-27dc-4bb9-08dd-0f53ce33ce71','rpi-salon','cuisine')" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;padding:10px 0;border-radius:8px;font-size:13px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:500;background:#0a1f15;border:1px solid #1d9e75;color:#5dcaa5;opacity:1"><i class="ti ti-player-play" style="font-size:15px;color:#5dcaa5"></i>Rejoindre</button><div style="margin-top:8px"><select onchange="selectOutput('rpi-salon',this.value)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;background:#111;border:1px solid #2a2a2a;border-radius:7px;color:#777;padding:5px 8px;font-size:11px;cursor:pointer;font-family:inherit"><option value="bt" selected="selected">Bluetooth (Echo)</option><option value="jack">Jack</option><option value="hdmi">HDMI</option></select></div><div style="margin-top:8px"><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#111;border:1px solid #2a2a2a;border-radius:8px"><button onclick="adjustLatency('d5f5ba1d-27dc-4bb9-08dd-0f53ce33ce71','echo',-50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-minus" style="font-size:15px"></i></button><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;color:#555;font-weight:500;min-width:55px;text-align:center">0s</span></div><button onclick="adjustLatency('d5f5ba1d-27dc-4bb9-08dd-0f53ce33ce71','echo',50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-plus" style="font-size:15px"></i></button></div></div></div><div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:.6rem;opacity:1;overflow:hidden;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:#fff"><i class="ti ti-speakerphone" style="font-size:18px;color:#555"></i>Chambre Parents (rpi)</div><div style="display:flex;align-items:center;gap:6px"><button onclick="rebootDevice('4595c5db-7274-97ad-e8b6-bc997d6a2bd7')" title="Redémarrer" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;cursor:pointer;padding:2px 4px;color:#555"><i class="ti ti-refresh" style="font-size:15px"></i></button><div title="en ligne" style="width:10px;height:10px;border-radius:50%;background:#1d9e75;flex-shrink:0;box-shadow:0 0 4px #1d9e75"></div></div></div><button onclick="joinStream('4595c5db-7274-97ad-e8b6-bc997d6a2bd7','rpi-parents','cuisine')" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;padding:10px 0;border-radius:8px;font-size:13px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:500;background:#0a1f15;border:1px solid #1d9e75;color:#5dcaa5;opacity:1"><i class="ti ti-player-play" style="font-size:15px;color:#5dcaa5"></i>Rejoindre</button><div style="margin-top:8px"><select onchange="selectOutput('rpi-parents',this.value)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;background:#111;border:1px solid #2a2a2a;border-radius:7px;color:#777;padding:5px 8px;font-size:11px;cursor:pointer;font-family:inherit"><option value="bt" selected="selected">Bluetooth (Echo)</option><option value="jack">Jack</option><option value="hdmi">HDMI</option></select></div><div style="margin-top:8px"><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#111;border:1px solid #2a2a2a;border-radius:8px"><button onclick="adjustLatency('4595c5db-7274-97ad-e8b6-bc997d6a2bd7','echo',-50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-minus" style="font-size:15px"></i></button><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;color:#555;font-weight:500;min-width:55px;text-align:center">0s</span></div><button onclick="adjustLatency('4595c5db-7274-97ad-e8b6-bc997d6a2bd7','echo',50)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#ccc;cursor:pointer;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-plus" style="font-size:15px"></i></button></div></div></div><div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:.6rem;opacity:0.35;overflow:hidden;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:#fff"><i class="ti ti-speakerphone" style="font-size:18px;color:#555"></i>Chambre Lilian (rpi)</div><div style="display:flex;align-items:center;gap:6px"><div title="hors ligne" style="width:10px;height:10px;border-radius:50%;background:#444;flex-shrink:0;box-shadow:0 0 none"></div></div></div><button onclick="" disabled="disabled" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;padding:10px 0;border-radius:8px;font-size:13px;font-family:inherit;cursor:not-allowed;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:500;background:#222;border:1px solid #333;color:#fff;opacity:0.4"><i class="ti ti-player-play" style="font-size:15px;color:#fff"></i>Hors ligne</button><div style="margin-top:8px"><select onchange="selectOutput('rpi-lilian',this.value)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;background:#111;border:1px solid #2a2a2a;border-radius:7px;color:#777;padding:5px 8px;font-size:11px;cursor:pointer;font-family:inherit"><option value="bt" selected="selected">Bluetooth (Echo)</option><option value="jack">Jack</option><option value="hdmi">HDMI</option></select></div><div style="margin-top:8px"><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#111;border:1px solid #2a2a2a;border-radius:8px"><button onclick="adjustLatency('83ca2dc2-692c-0283-f5c3-4ebfe7768279','echo',-50)" disabled="disabled" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#333;cursor:not-allowed;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-minus" style="font-size:15px"></i></button><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;color:#555;font-weight:500;min-width:55px;text-align:center">0s</span></div><button onclick="adjustLatency('83ca2dc2-692c-0283-f5c3-4ebfe7768279','echo',50)" disabled="disabled" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:#333;cursor:not-allowed;font-size:18px;padding:0 4px;line-height:1"><i class="ti ti-clock-plus" style="font-size:15px"></i></button></div></div></div></div></div>
+</div>
+</div>
+<script>
+const API="/jsonrpc";
+const STREAM_COLORS=[
+  {main:"#1d9e75",border:"#1d9e75",bg:"#0a1f15",text:"#5dcaa5"},
+  {main:"#ba7517",border:"#ba7517",bg:"#1e1408",text:"#ef9f27"},
+  {main:"#7f77dd",border:"#7f77dd",bg:"#12103a",text:"#b0abf0"},
+  {main:"#d4537e",border:"#d4537e",bg:"#200d14",text:"#f092b5"},
+  {main:"#378add",border:"#378add",bg:"#08152a",text:"#7ab8f5"},
+  {main:"#0ea5b0",border:"#0ea5b0",bg:"#051a1c",text:"#5de4ed"},
+  {main:"#c9a227",border:"#c9a227",bg:"#1e1800",text:"#f0cd6a"},
+  {main:"#e05252",border:"#e05252",bg:"#200a0a",text:"#f09898"},
+  {main:"#6366f1",border:"#6366f1",bg:"#0f0f2a",text:"#c7d2fe"},
+  {main:"#d97706",border:"#d97706",bg:"#1a1000",text:"#fbbf24"},
+  {main:"#f97316",border:"#f97316",bg:"#1f1008",text:"#fed7aa"},
+  {main:"#a78bfa",border:"#a78bfa",bg:"#1a0f2e",text:"#ddd6fe"},
+  {main:"#5cb85c",border:"#5cb85c",bg:"#0a1a0a",text:"#a3d9a3"},
+  {main:"#0d9488",border:"#0d9488",bg:"#041a18",text:"#5eead4"},
+];
+const STREAM_COLOR_ORDER=["cuisine","sdj","atelier","fourpain","parents","lilian","biblio","thais_echo","bain_echo","cuisine_echo","salon_echo","parents_echo","lilian_echo","maison","maison_full"];
+const GROUP_MAC={
+  "016e3537-578f-b2cd-5a37-48ebc1d5a8ea":"bc:24:11:fe:c3:39",
+  "3fa5da3f-8ba3-df55-feb8-c801659364f4":"bc:24:11:9a:9d:42",
+  "ca134b93-8951-9f02-b5fd-b5060d5458f0":"bc:24:11:c6:f4:b5",
+  "19bea368-d8a7-51ef-bd12-4aec3f8f6ffa":"bc:24:11:44:29:21",
+  "4310351e-aa93-5793-7707-dd021425830b":"bc:24:11:f1:73:ee",
+  "6eb0e7b9-39fe-67ee-4707-2a121c6e111b":"bc:24:11:88:88:c8",
+  "49c944c2-e3da-c460-febb-203a0741e201":"bc:24:11:89:b7:56",
+  "f5a4a5bf-301d-aba2-dac6-3d7184937484":"bc:24:11:2f:3a:a0",
+  "1efe8146-e7b4-f934-ca31-a98a221f89d6":"b8:27:eb:43:bc:e2",
+  "d5f5ba1d-27dc-4bb9-08dd-0f53ce33ce71":"b8:27:eb:ff:9e:c0",
+  "a7ee841b-51eb-5b67-6de1-fba2104f0cdf":"b8:27:eb:e9:46:20",
+  "4595c5db-7274-97ad-e8b6-bc997d6a2bd7":"b8:27:eb:76:02:df",
+  "83ca2dc2-692c-0283-f5c3-4ebfe7768279":"dc:a6:32:e2:8f:06",
+  "fce87803-8613-471a-218e-a83250f02558":"b8:27:eb:2d:b3:45",
+};
+const GROUP_OWNTONE={
+  "016e3537-578f-b2cd-5a37-48ebc1d5a8ea":true,
+  "3fa5da3f-8ba3-df55-feb8-c801659364f4":true,
+  "ca134b93-8951-9f02-b5fd-b5060d5458f0":true,
+  "19bea368-d8a7-51ef-bd12-4aec3f8f6ffa":true,
+  "6eb0e7b9-39fe-67ee-4707-2a121c6e111b":true,
+  "49c944c2-e3da-c460-febb-203a0741e201":true,
+};
+const GROUP_LXC={
+  "016e3537-578f-b2cd-5a37-48ebc1d5a8ea":"200",
+  "3fa5da3f-8ba3-df55-feb8-c801659364f4":"201",
+  "ca134b93-8951-9f02-b5fd-b5060d5458f0":"202",
+  "19bea368-d8a7-51ef-bd12-4aec3f8f6ffa":"203",
+  "4310351e-aa93-5793-7707-dd021425830b":"204",
+  "6eb0e7b9-39fe-67ee-4707-2a121c6e111b":"205",
+  "49c944c2-e3da-c460-febb-203a0741e201":"208",
+  "0cb6f6d4-de64-effa-d218-a2dbca2565bd":"213",
+};
+const GROUP_PI={
+  "1efe8146-e7b4-f934-ca31-a98a221f89d6":"rpi-cuisine",
+  "d5f5ba1d-27dc-4bb9-08dd-0f53ce33ce71":"rpi-salon",
+  "a7ee841b-51eb-5b67-6de1-fba2104f0cdf":"rpi-bain",
+  "4595c5db-7274-97ad-e8b6-bc997d6a2bd7":"rpi-parents",
+  "83ca2dc2-692c-0283-f5c3-4ebfe7768279":"rpi-lilian",
+  "fce87803-8613-471a-218e-a83250f02558":"rpi-thais",
+};
+const GROUP_DEFAULT_STREAM={
+  "1efe8146-e7b4-f934-ca31-a98a221f89d6":"cuisine_echo",
+  "d5f5ba1d-27dc-4bb9-08dd-0f53ce33ce71":"salon_echo",
+  "a7ee841b-51eb-5b67-6de1-fba2104f0cdf":"bain_echo",
+  "4595c5db-7274-97ad-e8b6-bc997d6a2bd7":"parents_echo",
+  "83ca2dc2-692c-0283-f5c3-4ebfe7768279":"lilian_echo",
+  "fce87803-8613-471a-218e-a83250f02558":"thais_echo",
+  "016e3537-578f-b2cd-5a37-48ebc1d5a8ea":"sdj",
+  "3fa5da3f-8ba3-df55-feb8-c801659364f4":"cuisine",
+  "ca134b93-8951-9f02-b5fd-b5060d5458f0":"atelier",
+  "19bea368-d8a7-51ef-bd12-4aec3f8f6ffa":"fourpain",
+  "4310351e-aa93-5793-7707-dd021425830b":"parents",
+  "6eb0e7b9-39fe-67ee-4707-2a121c6e111b":"lilian",
+  "49c944c2-e3da-c460-febb-203a0741e201":"biblio",
+};
+const GROUP_IMAGE={
+  "016e3537-578f-b2cd-5a37-48ebc1d5a8ea":"NS510.png",
+  "3fa5da3f-8ba3-df55-feb8-c801659364f4":"NS510.png",
+  "ca134b93-8951-9f02-b5fd-b5060d5458f0":"NS410.png",
+  "19bea368-d8a7-51ef-bd12-4aec3f8f6ffa":"NS410.png",
+  "4310351e-aa93-5793-7707-dd021425830b":"NS300.png",
+  "6eb0e7b9-39fe-67ee-4707-2a121c6e111b":"NS410.png",
+  "49c944c2-e3da-c460-febb-203a0741e201":"NS410.png",
+};
+const GROUP_NS300={
+  "4310351e-aa93-5793-7707-dd021425830b":true,
+};
+// Mapping nom scène → fichier image
+const SCENE_IMAGE_MAP={
+  "Aurore boréale":"Aurore_boreale.jpg","Champignon des bois":"Champignon_des_bois.jpg",
+  "Chinatown":"Chinatown.jpg","Coucher de soleil sur la savane":"Coucher_de_soleil.jpg",
+  "Détente":"Detente.jpg","Éclosion ambrée":"Eclosion_ambree.jpg",
+  "Étang doré":"Etang_dore.jpg","Honolulu":"Honolulu.jpg","Ibiza":"Ibiza.jpg",
+  "Lecture":"Lecture.jpg","Lumineux":"Lumineux.jpg","Magnéto":"Magneto.jpg",
+  "Malibu pink":"Malibu_pink.jpg","Miami":"Miami.jpg","Rio":"Rio.jpg",
+  "Rougegorge d'automne":"Rouge_gorge.jpg","Soho":"Soho.jpg","Sommeil":"Sommeil.jpg",
+  "Starlight":"Starlight.jpg","Tokyo":"Tokyo.jpg","Ville de l'amour":"Ville_de_lamour.jpg",
+  "Concentration":"Concentration.jpg","Veilleuse":"Veilleuse.jpg","Suzuka":"Suzuka.jpg"
+};
+// Mapping groupId → room_id Hue v2
+const GROUP_HUE_ROOM={
+  "ca134b93-8951-9f02-b5fd-b5060d5458f0":"2c0ad668-c4d4-4d9b-95da-2cebc9142c33", // Atelier
+  "016e3537-578f-b2cd-5a37-48ebc1d5a8ea":"58b32637-7212-4f10-b62c-2b19e987acc2", // SDJ
+  "3fa5da3f-8ba3-df55-feb8-c801659364f4":"1e9b2c5d-4adc-48f8-86be-754fd33ba6ba", // Cuisine
+  "4310351e-aa93-5793-7707-dd021425830b":"5960401e-b642-4d78-a0db-a505f6c03a35", // Parents
+  "6eb0e7b9-39fe-67ee-4707-2a121c6e111b":"dd1e3e36-c9a1-4ed0-89c8-79d5e6119502", // Lilian
+  "fce87803-8613-471a-218e-a83250f02558":"c68e49c4-aded-4a29-aa6a-4c189c282c09", // Thaïs
+};
+const GROUPS={
+  "016e3537-578f-b2cd-5a37-48ebc1d5a8ea":{label:"Salle de jeux (enceinte)",icon:"ti-device-speaker",type:"sony"},
+  "3fa5da3f-8ba3-df55-feb8-c801659364f4":{label:"Cuisine (enceinte)",icon:"ti-device-speaker",type:"sony"},
+  "ca134b93-8951-9f02-b5fd-b5060d5458f0":{label:"Atelier (enceinte)",icon:"ti-device-speaker",type:"sony"},
+  "19bea368-d8a7-51ef-bd12-4aec3f8f6ffa":{label:"Four \u00e0 Pain (enceinte)",icon:"ti-device-speaker",type:"sony"},
+  "4310351e-aa93-5793-7707-dd021425830b":{label:"Chambre Parents (enceinte)",icon:"ti-device-speaker",type:"sony"},
+  "6eb0e7b9-39fe-67ee-4707-2a121c6e111b":{label:"Chambre Lilian (enceinte)",icon:"ti-device-speaker",type:"sony"},
+  "49c944c2-e3da-c460-febb-203a0741e201":{label:"Bibliothèque (enceinte)",icon:"ti-device-speaker",type:"sony"},
+  "1efe8146-e7b4-f934-ca31-a98a221f89d6":{label:"Cuisine (rpi)",icon:"ti-speakerphone",type:"echo"},
+  "d5f5ba1d-27dc-4bb9-08dd-0f53ce33ce71":{label:"Salon (rpi)",icon:"ti-speakerphone",type:"echo"},
+  "a7ee841b-51eb-5b67-6de1-fba2104f0cdf":{label:"Salle de Bain (rpi)",icon:"ti-speakerphone",type:"echo"},
+  "4595c5db-7274-97ad-e8b6-bc997d6a2bd7":{label:"Chambre Parents (rpi)",icon:"ti-speakerphone",type:"echo"},
+  "83ca2dc2-692c-0283-f5c3-4ebfe7768279":{label:"Chambre Lilian (rpi)",icon:"ti-speakerphone",type:"echo"},
+  "fce87803-8613-471a-218e-a83250f02558":{label:"Chambre Tha\u00EFs (rpi)",icon:"ti-speakerphone",type:"echo"},
+};
+const STREAMS=[
+  {id:"sdj",label:"Salle de jeux (enceinte)"},{id:"cuisine",label:"Cuisine (enceinte)"},
+  {id:"atelier",label:"Atelier (enceinte)"},{id:"fourpain",label:"Four \u00e0 Pain (enceinte)"},
+  {id:"parents",label:"Chambre Parents (enceinte)"},{id:"lilian",label:"Chambre Lilian (enceinte)"},{id:"biblio",label:"Bibliothèque (enceinte)"},
+  {id:"cuisine_echo",label:"Cuisine (rpi)"},{id:"salon_echo",label:"Salon (rpi)"},
+  {id:"bain_echo",label:"Salle de Bain (rpi)"},{id:"parents_echo",label:"Chambre Parents (rpi)"},
+  {id:"lilian_echo",label:"Chambre Lilian (rpi)"},{id:"thais_echo",label:"Chambre Tha\u00EFs (rpi)"},
+  
+];
+let STREAM_GROUPS=[];
+const STREAMS_HIDDEN=['thais'];
+const PI_AUDIO_OUTPUTS={
+  "rpi-cuisine":["bt","jack","hdmi"],"rpi-salon":["bt","jack","hdmi"],
+  "rpi-bain":["bt","jack","hdmi"],"rpi-parents":["bt","jack","hdmi"],
+  "rpi-lilian":["bt","jack","hdmi"],"rpi-thais":["bt","jack","hdmi"],
+};
+const PI_AUDIO_LABELS={"bt":"Bluetooth (Echo)","jack":"Jack","hdmi":"HDMI"};
+const STEP_MS=50;
+const SONY_LAT_MIN=-5000,SONY_LAT_MAX=900,ECHO_LAT_MIN=-5000,ECHO_LAT_MAX=700;
+const JOIN_TIMEOUT=60000,JOIN_POLL=2000;
+
+let state={},spotifyConnected=false,spotifyDevices=[],linkedStream=null,streamGroupsData=[],streamStatus={},piStatus={},playingStreams=[],clientLatencies={};
+let joiningState={},changingOutput={},pendingOutput={},piAudioOutputs={},nowPlaying={};
+let rebootState={};
+let hueActive={};       // groupId → true/false
+let hueSnapshot={};     // groupId → snapshot état lumières avant activation
+let hueConfig=null;     // contenu de hue-config.json
+let nowPlayingFeatures={}; // contenu de now-playing-features.json
+let styleOverrides={};
+let hueLastTrack={};    // groupId → dernière piste traitée
+let hueCurrentScene={}; // groupId → nom scène en cours
+let hueLastStyle={}; // groupId → dernier style détecté
+let hueStreamScene={}; // streamId → scène en cours (partagée entre enceintes)
+// Restaurer état Hue depuis localStorage
+try{
+  const saved=JSON.parse(localStorage.getItem('hueState')||'{}');
+  hueActive=saved.hueActive||{};
+  hueCurrentScene=saved.hueCurrentScene||{};
+  hueLastTrack=saved.hueLastTrack||{};
+  hueSnapshot=saved.hueSnapshot||{};
+  hueLastStyle=saved.hueLastStyle||{};
+}catch(e){}
+function saveHueState(){
+  try{localStorage.setItem('hueState',JSON.stringify({hueActive,hueCurrentScene,hueLastTrack,hueSnapshot,hueLastStyle,hueStreamScene}));}catch(e){}
+  const serverState={};
+  for(const gid of Object.keys(hueActive)){
+    if(!hueActive[gid])continue;
+    const s=state[gid]||{};
+    const roomName=getRoomNameForGroup(gid);
+    serverState[gid]={active:true,stream:s.stream||'',roomName,currentScene:hueCurrentScene[gid]||'',lastStyle:hueLastStyle[gid]||''};
+  }
+  fetch('/hue-state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(serverState)}).catch(()=>{});
+}
+let owntoneVolumes={};
+let spotifyVolumes={};
+let containerStatus={};
+
+async function rpc(method,params={}){
+  const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:1,jsonrpc:"2.0",method,params})});
+  return (await r.json()).result;
+}
+async function fetchPiStatus(){
+  try{
+    const r=await fetch("/pi-status.json?_="+Date.now());
+    piStatus=await r.json();
+    // Initialiser piAudioOutputs depuis piStatus
+    Object.keys(piStatus).forEach(function(pi){
+      if(piStatus[pi]&&piStatus[pi].audio&&!changingOutput[pi]){
+        piAudioOutputs[pi]=piStatus[pi].audio;
+      }
+    });
+  }catch(e){piStatus={};}
+}
+let lastPiAudioRefresh=0;
+async function fetchPiAudioOutputs(force=false){
+  const now=Date.now();
+  
+  lastPiAudioRefresh=now;
+  const controller=new AbortController();
+  const tid=setTimeout(()=>controller.abort(),1500);
+  const promises=Object.keys(PI_AUDIO_OUTPUTS).map(async pi=>{
+    try{
+      const r=await fetch("/get-output?pi="+pi,{signal:controller.signal});
+      const d=await r.json();
+      piAudioOutputs[pi]=d.output||"bt";
+    }catch(e){
+      if(!piAudioOutputs[pi]) piAudioOutputs[pi]="bt";
+    }
+  });
+  await Promise.allSettled(promises);
+  clearTimeout(tid);
+}
+async function fetchNowPlaying(){
+  try{const r=await fetch("/now-playing.json?_="+Date.now());nowPlaying=await r.json();}catch(e){nowPlaying={};}
+}
+async function fetchNowPlayingFeatures(){
+  try{
+    const r=await fetch('/now-playing-features.json?_='+Date.now());
+    nowPlayingFeatures=await r.json();
+    // Appliquer les overrides après chaque fetch
+    Object.keys(nowPlaying).forEach(function(streamId){
+      var npd=nowPlaying[streamId];
+      if(!npd||!npd.track||!npd.artist)return;
+      var key=(npd.artist+'|||'+npd.track).toLowerCase();
+      if(styleOverrides[key]){
+        if(!nowPlayingFeatures[streamId])nowPlayingFeatures[streamId]={};
+        nowPlayingFeatures[streamId].style=styleOverrides[key];
+        nowPlayingFeatures[streamId].overridden=true;
+      }
+    });
+  }catch(e){nowPlayingFeatures={};}
+}
+async function fetchStyleOverrides(){
+  try{const r=await fetch('/style-overrides.json');styleOverrides=await r.json();}catch(e){styleOverrides={};}
+}
+async function fetchHueConfig(){
+  if(hueConfig)return;
+  try{const r=await fetch('/hue-config.json?_='+Date.now());hueConfig=await r.json();}catch(e){}
+}
+function getHueStyle(streamId){
+  const f=nowPlayingFeatures[streamId];
+  const _rawStyle=f?f.style||'defaut':'defaut';
+    const _npd=nowPlaying[streamId];
+    if(_npd&&_npd.track&&_npd.artist){
+      const _key=(_npd.artist+'|||'+_npd.track).toLowerCase();
+      if(styleOverrides[_key]){
+        if(!nowPlayingFeatures[streamId])nowPlayingFeatures[streamId]={};
+        nowPlayingFeatures[streamId].style=styleOverrides[_key];
+        nowPlayingFeatures[streamId].overridden=true;
+        return styleOverrides[_key];
+      }
+    }
+    if(nowPlayingFeatures[streamId])nowPlayingFeatures[streamId].overridden=false;
+    return _rawStyle;
+}
+function getHueSceneForStyle(roomName,styleId){
+  if(!hueConfig)return'Lumineux';
+  const room=Object.entries(hueConfig.rooms).find(([n])=>n===roomName);
+  const style=hueConfig.styles.find(s=>s.id===styleId);
+  if(!style)return'Lumineux';
+  const scenes=(room&&room[1].scenes&&room[1].scenes[styleId])?room[1].scenes[styleId]:style.scenes;
+  const valid=scenes.filter(s=>s&&s.length>0);
+  if(!valid.length)return'Lumineux';
+  return valid[Math.floor(Math.random()*valid.length)];
+}
+function getRoomNameForGroup(groupId){
+  const label=GROUPS[groupId]?GROUPS[groupId].label:'';
+  return label.replace(/ \(enceinte\)| \(rpi\)/g,'').trim();
+}
+async function activateHue(groupId){
+  if(hueActivating)return;
+  hueActivating=true;
+  const roomId=GROUP_HUE_ROOM[groupId];
+  if(!roomId){hueActivating=false;return;}
+  hueConfig=null;
+  // Paralléliser les appels
+  const [,, snapResult] = await Promise.allSettled([
+    fetchHueConfig(),
+    fetchNowPlayingFeatures(),
+    fetch('/hue-get-state?room_id='+roomId).then(r=>r.json()).catch(()=>({}))
+  ]);
+  hueSnapshot[groupId] = snapResult.status==='fulfilled' ? snapResult.value : {};
+  hueActive[groupId]=true;
+  hueLastTrack[groupId]='';
+  hueLastStyle[groupId]='';
+  const _s=state[groupId]||{};
+  if(_s.stream){
+    const otherActive=Object.keys(hueActive).some(gid=>gid!==groupId&&hueActive[gid]&&(state[gid]||{}).stream===_s.stream);
+    if(!otherActive) delete hueStreamScene[_s.stream];
+  }
+  saveHueState();
+  renderGroups();
+  await triggerHueScene(groupId);
+  hueActivating=false;
+}
+let hueDeactivating={};
+let hueActivating=false;
+async function deactivateHue(groupId){
+  if(hueDeactivating[groupId]){
+    setTimeout(()=>deactivateHue(groupId),600);
+    return;
+  }
+  hueDeactivating[groupId]=true;
+  hueActive[groupId]=false;
+  renderGroups();
+  const roomId=GROUP_HUE_ROOM[groupId];
+  if(roomId){
+    try{
+      await fetch('/activate-hue-scene',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({room_id:roomId,scene_name:'Lumineux'})
+      });
+    }catch(e){}
+  }
+  delete hueSnapshot[groupId];
+  delete hueLastTrack[groupId];
+  delete hueCurrentScene[groupId];
+  delete hueLastStyle[groupId];
+  delete hueDeactivating[groupId];
+  saveHueState();
+}
+async function triggerHueScene(groupId){
+  const roomId=GROUP_HUE_ROOM[groupId];
+  if(!roomId||!hueActive[groupId])return;
+  const s=state[groupId]||{};
+  const streamId=s.stream||'';
+  const styleId=getHueStyle(streamId);
+  const roomName=getRoomNameForGroup(groupId);
+  // Utiliser la scène déjà tirée pour ce stream, sinon en tirer une nouvelle
+  if(!hueStreamScene[streamId]||hueStreamScene[streamId+'_style']!==styleId){
+    hueStreamScene[streamId]=getHueSceneForStyle(roomName,styleId);
+    hueStreamScene[streamId+'_style']=styleId;
+  }
+  const sceneName=hueStreamScene[streamId];
+  console.log('[HUE] groupId='+groupId+' roomId='+roomId+' streamId='+streamId+' styleId='+styleId+' roomName='+roomName+' sceneName='+sceneName);
+  try{
+    const r=await fetch('/activate-hue-scene',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({room_id:roomId,scene_name:sceneName})
+    });
+    const d=await r.json();
+    console.log('[HUE] result='+JSON.stringify(d));
+    if(d.status==='ok'){hueCurrentScene[groupId]=sceneName;saveHueState();renderGroups();}
+  }catch(e){console.log('[HUE] error='+e);}
+}
+async function hueAutoUpdate(){
+  for(const groupId of Object.keys(hueActive)){
+    if(!hueActive[groupId])continue;
+    const s=state[groupId]||{};
+    const streamId=s.stream||'';
+    const streamPlaying=playingStreams.includes(streamId);
+    const snapConnected=s.clients&&s.clients.some(c=>c.connected);
+    const isActive=snapConnected&&streamPlaying&&!s.muted;
+    // Stream inactif ou en pause → désactiver Hue automatiquement
+    if(!isActive){
+      deactivateHue(groupId).catch(()=>{});
+      continue;
+    }
+    const np=nowPlaying[streamId];
+    const trackKey=np?(np.track+'|'+np.artist):'';
+    if(trackKey&&trackKey!==hueLastTrack[groupId]){
+      hueLastTrack[groupId]=trackKey;
+      const newStyle=getHueStyle(streamId);
+      // Changer de scène seulement si le style change et est connu
+      if(newStyle&&newStyle!=='defaut'&&newStyle!==hueLastStyle[groupId]){
+        hueLastStyle[groupId]=newStyle;
+        await triggerHueScene(groupId);
+      } else if(newStyle&&newStyle===hueLastStyle[groupId]){
+        // Même style → ne rien faire
+      } else if(!hueLastStyle[groupId]&&newStyle){
+        // Premier déclenchement
+        hueLastStyle[groupId]=newStyle;
+        await triggerHueScene(groupId);
+      }
+    }
+  }
+}
+async function snapclientControl(pi,action,stream){
+  try{await fetch("/snapclient-control?pi="+pi+"&action="+action+"&stream="+(stream||""));}catch(e){}
+}
+function getStreamColor(streamId){
+  if(!playingStreams.includes(streamId)) return null;
+  const idx=STREAM_COLOR_ORDER.indexOf(streamId);
+  return STREAM_COLORS[idx===-1?0:idx%STREAM_COLORS.length];
+}
+async function pollUntilActive(groupId,maxMs){
+  const start=Date.now();
+  while(Date.now()-start<maxMs){
+    await new Promise(r=>setTimeout(r,JOIN_POLL));
+    try{
+      const data=await rpc("Server.GetStatus");
+      const ns={};data.server.streams.forEach(s=>{ns[s.id]=s.status;});
+      for(const g of data.server.groups){
+        if(g.id===groupId){
+          if(g.clients.some(c=>c.connected)&&ns[g.stream_id]==="playing") return true;
+        }
+      }
+    }catch(e){}
+  }
+  return false;
+}
+async function fetchStreamGroups(){
+  try{
+    const r=await fetch("/stream-groups.json?_="+Date.now());
+    const data=await r.json();
+    STREAM_GROUPS=data.groups.map(function(g){return g.id;});
+    streamGroupsData=data.groups;
+    // Ajouter dans STREAMS si pas déjà présent
+    data.groups.forEach(function(g){
+      if(!STREAMS.find(function(s){return s.id===g.id;})){
+        STREAMS.push({id:g.id,label:g.label});
+      } else {
+        const s=STREAMS.find(function(s){return s.id===g.id;});
+        s.label=g.label;
+      }
+    });
+    // Retirer les anciens groupes qui ne sont plus dans le JSON
+    for(let i=STREAMS.length-1;i>=0;i--){
+      const sid=STREAMS[i].id;
+      const wasGroup=STREAM_COLOR_ORDER.includes(sid)&&!['cuisine','sdj','atelier','fourpain','parents','lilian','biblio','thais_echo','bain_echo','cuisine_echo','salon_echo','parents_echo','lilian_echo'].includes(sid);
+      if(wasGroup&&!STREAM_GROUPS.includes(sid)){STREAMS.splice(i,1);}
+    }
+  }catch(e){}
+}
+async function fetchContainerStatus(){
+  try{
+    const r=await fetch('/container-status.json?_='+Date.now());
+    containerStatus=await r.json();
+  }catch(e){containerStatus={};}
+}
+async function fetchSpotifyStatus(){
+  try{
+    const r=await fetch("/spotify-status?_="+Date.now());
+    const d=await r.json();
+    spotifyConnected=d.connected;
+    const btn=document.getElementById("spotify-btn");
+    const txt=document.getElementById("spotify-btn-txt");
+    if(btn){
+      btn.style.background="#1a1a1a";
+      btn.style.borderColor="#444";
+      btn.style.color="#fff";
+      if(txt) txt.textContent=spotifyConnected?"Spotify connecté":"Connecter Spotify";
+    }
+  }catch(e){spotifyConnected=false;}
+}
+async function fetchSpotifyDevices(){
+  if(!spotifyConnected) return;
+  try{
+    const controller=new AbortController();
+    const tid=setTimeout(()=>controller.abort(),3000);
+    const r=await fetch("/spotify-devices?_="+Date.now(),{signal:controller.signal});
+    clearTimeout(tid);
+    const d=await r.json();
+    spotifyDevices=(d.devices||[]).map(function(x){return x.name;});
+    renderGroups();
+  }catch(e){spotifyDevices=[];}
+}
+async function transferToDevice(name){
+  if(!spotifyConnected){window.location.href="/spotify-auth";return;}
+  try{
+    const r=await fetch("/spotify-transfer?name="+encodeURIComponent(name));
+    const d=await r.json();
+    if(d.status!=="ok") showToast("Device non trouvé dans Spotify",3000);
+  }catch(e){}
+}
+function spotifyAuth(){
+  if(!spotifyConnected) window.location.href="/spotify-auth";
+}
+async function fetchSpotifyVolumes(){
+  try{
+    const r=await fetch('/spotify-volume.json?_='+Date.now());
+    spotifyVolumes=await r.json();
+  }catch(e){spotifyVolumes={};}
+}
+let ns300Volumes={};
+async function fetchNs300Volumes(){
+  for(const id of Object.keys(GROUP_NS300)){
+    try{
+      const r=await fetch('/get-ns300-volume?group='+id);
+      const data=await r.json();
+      ns300Volumes[id]=data.volume;
+    }catch(e){}
+  }
+}
+async function setNs300Volume(groupId,delta){
+  const current=ns300Volumes[groupId]||50;
+  const newVol=Math.min(100,Math.max(0,Math.round(current+delta)));
+  ns300Volumes[groupId]=newVol;
+  renderGroups();
+  const r=await fetch('/set-ns300-volume?group='+groupId+'&volume='+newVol).catch(()=>{});
+  if(r){const d=await r.json().catch(()=>{});if(d&&d.volume!==undefined){ns300Volumes[groupId]=d.volume;renderGroups();}}
+}
+async function fetchOwntoneVolumes(){
+  await Promise.all(Object.keys(GROUP_OWNTONE).map(async id=>{
+    try{
+      const r=await fetch('/get-owntone-volume?group='+id);
+      const data=await r.json();
+      owntoneVolumes[id]=data.volume;
+    }catch(e){}
+  }));
+}
+async function setOwntoneVolume(groupId,delta){
+  const current=owntoneVolumes[groupId]||50;
+  const newVol=Math.min(100,Math.max(0,Math.round(current+delta)));
+  owntoneVolumes[groupId]=newVol;
+  renderGroups();
+  await fetch('/set-owntone-volume?group='+groupId+'&volume='+newVol).catch(()=>{});
+}
+async function refresh(){
+  await fetchPiStatus();await fetchPiAudioOutputs();await fetchNowPlaying();await fetchSpotifyVolumes();await fetchContainerStatus();await fetchStreamGroups();
+  try{
+    const data=await rpc("Server.GetStatus");
+    state={};streamStatus={};playingStreams=[];clientLatencies={};
+    data.server.streams.forEach(s=>{streamStatus[s.id]=s.status;if(s.status==="playing")playingStreams.push(s.id);});
+    data.server.groups.forEach(g=>{
+      state[g.id]={stream:g.stream_id,muted:g.muted,clients:g.clients};
+      g.clients.forEach(c=>{clientLatencies[c.id]=c.config.latency;});
+    });
+    fetchNowPlayingFeatures().then(()=>{renderStreams(data.server.streams);renderGroups();renderNowPlayingPanel();autoJoinStreams();if(Object.values(hueActive).some(v=>v))hueAutoUpdate();});
+    const _d=document.getElementById("srv-dot");if(_d){_d.style.background="#1d9e75";_d.title="connecté";}
+    
+  }catch(e){
+    const _d2=document.getElementById("srv-dot");if(_d2){_d2.style.background="#888";_d2.title="erreur";}
+    
+  }
+}
+function renderNowPlayingPanel(){
+  const sidebar=document.getElementById("cover-sidebar");
+  if(!sidebar)return;
+  const active=playingStreams.map(sid=>{
+    const color=getStreamColor(sid);
+    const np=nowPlaying[sid];
+    const label=(STREAMS.find(function(x){return x.id===sid;})||{label:sid}).label;
+    if(!color)return"";
+    const infoHtml='<div class="cover-info">'
+      +'<div class="cover-stream" style="color:'+color.text+'">'+label+'</div>'
+      +(np&&np.track
+        ?'<div class="cover-track">'+np.track+'</div><div class="cover-artist">'+np.artist+'</div>'
+        :'<div class="cover-track" style="color:#555">En cours...</div>')
+      +'</div>';
+    const imgHtml=np&&np.cover
+      ?'<img src="'+np.cover+'" alt="">'
+      :'<div class="cover-noart"><i class="ti ti-music" style="font-size:48px;color:#333"></i></div>';
+    return'<div class="cover-card" style="border-color:'+color.border+'">'
+      +imgHtml+infoHtml+'</div>';
+  }).join("");
+  sidebar.innerHTML=active;
+  sidebar.style.display=active?"flex":"none";sidebar.classList.toggle("active",active);
+}
+
+const VAR_TO_GROUPID={
+  "SDJ_GROUP":         "016e3537-578f-b2cd-5a37-48ebc1d5a8ea",
+  "CUISINE_GROUP":     "3fa5da3f-8ba3-df55-feb8-c801659364f4",
+  "ATELIER_GROUP":     "ca134b93-8951-9f02-b5fd-b5060d5458f0",
+  "FOURPAIN_GROUP":    "19bea368-d8a7-51ef-bd12-4aec3f8f6ffa",
+  "PARENTS_GROUP":     "4310351e-aa93-5793-7707-dd021425830b",
+  "LILIAN_GROUP":      "6eb0e7b9-39fe-67ee-4707-2a121c6e111b",
+  "BIBLIO_GROUP":      "49c944c2-e3da-c460-febb-203a0741e201",
+  "THAIS_GROUP":       "f5a4a5bf-301d-aba2-dac6-3d7184937484",
+  "RPI_CUISINE_GROUP": "1efe8146-e7b4-f934-ca31-a98a221f89d6",
+  "RPI_SALON_GROUP":   "d5f5ba1d-27dc-4bb9-08dd-0f53ce33ce71",
+  "RPI_BAIN_GROUP":    "a7ee841b-51eb-5b67-6de1-fba2104f0cdf",
+  "RPI_PARENTS_GROUP": "4595c5db-7274-97ad-e8b6-bc997d6a2bd7",
+  "RPI_LILIAN_GROUP":  "83ca2dc2-692c-0283-f5c3-4ebfe7768279",
+  "RPI_THAIS_GROUP":   "fce87803-8613-471a-218e-a83250f02558",
+  "ECHOHUB_GROUP":     "0cb6f6d4-de64-effa-d218-a2dbca2565bd",
+};
+function getStreamGroupMembers(streamId){
+  const g=streamGroupsData.find(function(x){return x.id===streamId;});
+  if(!g) return [];
+  return (g.force||[]).concat(g.if_idle||[]).map(function(v){return VAR_TO_GROUPID[v];}).filter(Boolean);
+}
+function toggleLinked(streamId){
+  linkedStream=linkedStream===streamId?null:streamId;
+  renderGroups();
+  // Re-render streams bar pour mettre à jour le niveau moyen
+  if(typeof lastStreams!=="undefined") renderStreams(lastStreams);
+}
+async function adjustLinkedVolume(delta){
+  if(!linkedStream) return;
+  const members=getStreamGroupMembers(linkedStream);
+  // Calculer le niveau moyen actuel
+  const vols=members.map(function(gid){
+    return owntoneVolumes[gid]!==undefined?owntoneVolumes[gid]:(ns300Volumes[gid]!==undefined?ns300Volumes[gid]:null);
+  }).filter(function(v){return v!==null;});
+  if(!vols.length) return;
+  const avg=Math.round(vols.reduce(function(a,b){return a+b;},0)/vols.length);
+  const newVol=Math.min(100,Math.max(0,avg+delta));
+  // Appliquer le même niveau à tous les membres
+  for(const gid of members){
+    if(GROUP_OWNTONE[gid]){
+      owntoneVolumes[gid]=newVol;
+      fetch('/set-owntone-volume?group='+gid+'&volume='+newVol).catch(function(){});
+    } else if(GROUP_NS300[gid]){
+      ns300Volumes[gid]=newVol;
+      fetch('/set-ns300-volume?group='+gid+'&volume='+newVol).catch(function(){});
+    }
+  }
+  renderGroups();
+  // Re-render streams bar pour mettre à jour le niveau moyen
+  if(typeof lastStreams!=="undefined") renderStreams(lastStreams);
+}
+let lastStreams=[];
+function renderStreams(streams){
+  if(streams) lastStreams=streams;
+  const np=nowPlaying;
+  function renderStream(s){
+    const playing=s.status==="playing";
+    const color=playing?getStreamColor(s.id):null;
+    const label=(STREAMS.find(function(x){return x.id===s.id;})||{label:s.id}).label;
+    const npStream=playing?np[s.id]:null;
+    if(playing&&color){
+      const meta=npStream&&npStream.track
+        ?'<div style="display:flex;align-items:center;gap:6px;max-width:300px;overflow:hidden">'
+          +(npStream.cover?'<img src="'+npStream.cover+'" style="width:20px;height:20px;border-radius:3px;flex-shrink:0">':'')
+          +'<span style="font-weight:500">'+label+'</span>'
+          +'<span style="opacity:0.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;display:inline-block;vertical-align:middle">\u2014 '+npStream.track+' \u00B7 '+npStream.artist+'</span></div>'
+        :'<div style="display:flex;align-items:center;gap:6px"><div style="width:6px;height:6px;border-radius:50%;background:'+color.main+';flex-shrink:0"></div>'+label+'</div>';
+      const resetBtn='<button onclick="resetStream(\''+s.id+'\')" title="Redémarrer librespot" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;cursor:pointer;padding:0 2px;color:'+color.text+';opacity:0.6;display:flex;align-items:center"><i id="rst-'+s.id+'" class="ti ti-refresh" style="font-size:12px"></i></button>';
+      const svol=spotifyVolumes[s.id]!==undefined?'<span style="display:flex;align-items:center;gap:3px;font-size:13px;font-weight:500;opacity:0.85;margin-left:4px"><i class="ti ti-volume" style="font-size:13px"></i>'+spotifyVolumes[s.id]+'%</span>':'';
+      const STYLE_LABELS={'energique':'⚡ Énergique','dansant':'💃 Dansant','calme':'🌙 Calme','acoustique':'🎸 Acoustique','festif':'🎉 Festif','melancolique':'🌧 Mélancolique','instrumental':'🎼 Instrumental','defaut':'🎵 Défaut'};
+      const streamStyle=(nowPlayingFeatures[s.id]||{}).style||'';
+      const _sfeat=nowPlayingFeatures[s.id]||{};
+      const _isOvr=_sfeat.overridden||false;
+      const _npBadge=nowPlaying[s.id];
+      const _ovrKey=_npBadge&&_npBadge.track&&_npBadge.artist?(_npBadge.artist+'|||'+_npBadge.track).toLowerCase():'';
+      const _hasOvr=_ovrKey&&styleOverrides[_ovrKey];
+      const _SOPTS=['energique','dansant','calme','acoustique','festif','melancolique','instrumental','defaut'];
+      const styleBadge=streamStyle&&STYLE_LABELS[streamStyle]?
+        '<div style="position:relative;display:inline-flex;align-items:center">'
+        +'<span id="style-badge-'+s.id+'" onclick="event.stopPropagation();toggleStyleDropdown(\''+s.id+'\')" style="cursor:pointer;font-size:11px;padding:2px 7px;border-radius:10px;background:rgba(255,255,255,0.08);color:'+color.text+';margin-left:4px;opacity:0.9;display:inline-flex;align-items:center;gap:3px;user-select:none">'
+        +STYLE_LABELS[streamStyle]
+        +(_isOvr?'<span title="Style modifi\u00e9 manuellement" style="font-size:10px;opacity:0.7">\u270f</span>':'')
+        +'</span>'
+        +'<div id="style-dd-'+s.id+'" style="display:none;position:absolute;top:calc(100% + 4px);left:4px;z-index:999;background:#1e1e1e;border:1px solid #333;border-radius:8px;padding:4px;min-width:170px;box-shadow:0 4px 16px rgba(0,0,0,0.6)">'
+        +_SOPTS.map(function(st){
+          var isAct=streamStyle===st;
+          var stOvr=_ovrKey&&styleOverrides[_ovrKey]===st;
+          return '<div onclick="event.stopPropagation();applyStyleOverride(\''+s.id+'\',\''+st+'\')" style="cursor:pointer;padding:5px 10px;border-radius:5px;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:'+(isAct?color.text:'#aaa')+';background:'+(isAct?'rgba(255,255,255,0.07)':'transparent')+'" onmouseover="this.style.background=\'rgba(255,255,255,0.05)\'" onmouseout="this.style.background=\''+(isAct?'rgba(255,255,255,0.07)':'transparent')+'\'">'
+          +'<span>'+STYLE_LABELS[st]+'</span>'
+          +(stOvr?'<span style="font-size:10px;opacity:0.6">\u270f</span>':'')
+          +'</div>';
+        }).join('')
+        +(_hasOvr?'<div style="border-top:1px solid #333;margin:3px 0 0;padding-top:3px"><div onclick="event.stopPropagation();applyStyleOverride(\''+s.id+'\',\'remove\')" style="cursor:pointer;padding:4px 10px;border-radius:5px;font-size:11px;color:#f5a623;display:flex;align-items:center;gap:5px" onmouseover="this.style.background=\'rgba(255,255,255,0.05)\'" onmouseout="this.style.background=\'transparent\'">\u21a9 Supprimer l\'override</div></div>':'')
+        +'</div>'
+        +'</div>'
+        :'';
+      return '<div style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:12px;background:'+color.bg+';border:1px solid '+color.border+';color:'+color.text+';max-width:500px;overflow:hidden">'+meta+svol+styleBadge+resetBtn+'</div>';
+    }
+    return '<div style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:12px;background:#1a1a1a;border:1px solid #2a2a2a;color:#888">'+label+'<button onclick="resetStream(\''+s.id+'\')" title="Redémarrer librespot" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;cursor:pointer;padding:0 2px;color:#555;display:flex;align-items:center"><i id="rst-'+s.id+'" class="ti ti-refresh" style="font-size:12px"></i></button></div>';
+  }
+  const allActiveStreams=streams.filter(s=>s.status==="playing"&&!STREAMS_HIDDEN.includes(s.id));
+  document.getElementById("streams-bar").innerHTML=allActiveStreams.filter(s=>!STREAM_GROUPS.includes(s.id)).map(renderStream).join("")+allActiveStreams.filter(s=>STREAM_GROUPS.includes(s.id)).map(function(s){
+    const base=renderStream(s);
+    const playing=s.status==="playing";
+    if(!playing) return base;
+    const isLinked=linkedStream===s.id;
+    const color=getStreamColor(s.id);
+    const linkBtn='<button onclick="toggleLinked(\''+s.id+'\')" title="'+(isLinked?'Délier volumes':'Lier volumes')+'" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:'+(isLinked?'rgba(255,160,0,0.15)':'none')+';border:'+(isLinked?'1px solid #c87000':'none')+';border-radius:5px;cursor:pointer;padding:2px 5px;color:'+(isLinked?'#ef9f27':'#555')+';display:flex;align-items:center"><i class="ti '+(isLinked?'ti-link':'ti-link-off')+'" style="font-size:12px"></i></button>';
+    if(!isLinked){const li=base.lastIndexOf('</div>');return base.substring(0,li)+linkBtn+'</div>';}
+    const volCtrl='<div style="display:flex;align-items:center;gap:4px;margin-left:4px">'
+      +'<span style="font-size:12px;color:#ef9f27;min-width:28px;text-align:center">'+(function(){var m=getStreamGroupMembers(s.id);var vols=m.map(function(gid){return owntoneVolumes[gid];}).filter(function(v){return v!==undefined;});return vols.length?Math.round(vols.reduce(function(a,b){return a+b;},0)/vols.length)+'%':'\u2014';})()+'</span>'
+      +'<button onclick="adjustLinkedVolume(-1)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:rgba(239,159,39,0.15);border:1px solid #c87000;border-radius:5px;color:#ef9f27;cursor:pointer;padding:1px 7px;font-size:14px;font-family:inherit">−</button>'
+      +'<button onclick="adjustLinkedVolume(1)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:rgba(239,159,39,0.15);border:1px solid #c87000;border-radius:5px;color:#ef9f27;cursor:pointer;padding:1px 7px;font-size:14px;font-family:inherit">+</button>'
+      +'</div>';
+    const li2=base.lastIndexOf('</div>');return base.substring(0,li2)+linkBtn+volCtrl+'</div>';
+  }).join("");
+  document.getElementById("streams-bar-groups").innerHTML="";
+}
+function formatLatency(ms){if(ms===0)return"0s";const s=(ms/1000).toFixed(2);return ms>0?"+"+s+"s":s+"s";}
+function getClientLatency(groupId){const mac=GROUP_MAC[groupId];return mac?clientLatencies[mac]||0:0;}
+function getLimits(type){return type==="sony"?{min:SONY_LAT_MIN,max:SONY_LAT_MAX}:{min:ECHO_LAT_MIN,max:ECHO_LAT_MAX};}
+function btn(bg,border,icon,color,label,clickable,action,small){
+  const pad=small?"8px 0":"10px 0";const fs=small?"12px":"13px";
+  return '<button onclick="'+action+'" '+(clickable?"":"disabled")+' style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;padding:'+pad+';border-radius:8px;font-size:'+fs+';font-family:inherit;cursor:'+(clickable?"pointer":"not-allowed")+';display:flex;align-items:center;justify-content:center;gap:7px;font-weight:500;background:'+bg+';border:1px solid '+border+';color:'+color+';opacity:'+(clickable?1:0.4)+'"><i class="ti '+icon+'" style="font-size:15px;color:'+color+'"></i>'+label+'</button>';
+}
+function renderGroups(){
+  const ORDER=[
+    "ca134b93-8951-9f02-b5fd-b5060d5458f0",
+    "016e3537-578f-b2cd-5a37-48ebc1d5a8ea",
+    "3fa5da3f-8ba3-df55-feb8-c801659364f4",
+    "19bea368-d8a7-51ef-bd12-4aec3f8f6ffa",
+    "4310351e-aa93-5793-7707-dd021425830b",
+    "6eb0e7b9-39fe-67ee-4707-2a121c6e111b",
+    "49c944c2-e3da-c460-febb-203a0741e201",
+    "fce87803-8613-471a-218e-a83250f02558",
+    "a7ee841b-51eb-5b67-6de1-fba2104f0cdf",
+    "1efe8146-e7b4-f934-ca31-a98a221f89d6",
+    "d5f5ba1d-27dc-4bb9-08dd-0f53ce33ce71",
+    "4595c5db-7274-97ad-e8b6-bc997d6a2bd7",
+    "83ca2dc2-692c-0283-f5c3-4ebfe7768279",
+  ];
+  const allHtml=ORDER.filter(function(id){return GROUPS[id];}).map(function(id){
+        const s=state[id]||{stream:"",muted:false,clients:[]};
+        const snapConnected=s.clients&&s.clients.some(function(c){return c.connected;});
+        const muted=s.muted;
+        const streamPlaying=streamStatus[s.stream]==="playing";
+        const isActive=snapConnected&&streamPlaying;
+        const piName=GROUP_PI[id];
+        const piPingable=piName?piStatus[piName]&&piStatus[piName].online===true:null;
+        const lxcId=GROUP_LXC[id];
+        const containerOnline=lxcId&&containerStatus[lxcId]!==undefined?containerStatus[lxcId]:null;
+        const effectiveOnline=piName!==undefined?piPingable:(containerOnline!==null?containerOnline:snapConnected);
+        const opacity=(!effectiveOnline&&effectiveOnline!==null)?0.35:1;
+        const myColor=isActive?getStreamColor(s.stream):null;
+        const latency=getClientLatency(id);
+        const latencyStr=formatLatency(latency);
+        const latencyColor=latency===0?"#555":latency>0?"#ef9f27":"#7ab8f5";
+        const limits=getLimits(GROUPS[id].type);
+        const canDec=effectiveOnline&&!!GROUP_MAC[id]&&latency>limits.min;
+        const canInc=effectiveOnline&&!!GROUP_MAC[id]&&latency<limits.max;
+        const canReset=effectiveOnline&&!!GROUP_MAC[id]&&latency!==0;
+        const isOnDefaultStream=s.stream===GROUP_DEFAULT_STREAM[id];
+        const joinStatus=joiningState[id];
+        const cardBorder=(isActive&&myColor&&!muted)?"1px solid "+myColor.border:"1px solid #2a2a2a";
+        const badgeBg=effectiveOnline?"#0f2a1e":"#222";
+        const badgeColor=effectiveOnline?"#5dcaa5":"#666";
+        const badgeBorder=effectiveOnline?"#1d9e75":"#333";
+        const badgeText=effectiveOnline?"en ligne":"hors ligne";
+        const iconColor=(isActive&&myColor&&!muted)?myColor.main:"#555";
+        const leaveAction=piName?"leaveStream('"+id+"','"+piName+"')"+"":"leaveStream('"+id+"',null)";
+        const barsHtml=(isActive&&myColor&&!muted)?'<div style="display:flex;align-items:flex-end;gap:2px;height:14px;margin-left:4px;margin-right:6px"><span style="width:3px;border-radius:1px;background:'+myColor.main+';animation:bar 0.8s ease-in-out infinite;animation-delay:0s"></span><span style="width:3px;border-radius:1px;background:'+myColor.main+';animation:bar 0.8s ease-in-out infinite;animation-delay:0.15s"></span><span style="width:3px;border-radius:1px;background:'+myColor.main+';animation:bar 0.8s ease-in-out infinite;animation-delay:0.3s"></span><span style="width:3px;border-radius:1px;background:'+myColor.main+';animation:bar 0.8s ease-in-out infinite;animation-delay:0.45s"></span></div>':'';
+
+        const npData=isActive&&!muted?nowPlaying[s.stream]:null;
+        const nowPlayingHtml=npData&&npData.track
+          ?'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:7px 8px;background:#0d0d0d;border-radius:8px;border:1px solid #222;min-width:0">'
+            +(npData.cover?'<img src="'+npData.cover+'" style="width:32px;height:32px;border-radius:4px;flex-shrink:0">':'')
+            +'<div style="min-width:0;flex:1"><div style="font-size:12px;font-weight:500;color:#e8e8e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+npData.track+'</div>'
+            +'<div style="font-size:11px;color:#777;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+npData.artist+'</div></div></div>':'';
+
+        let mainBtn="";
+        if(!effectiveOnline){
+          mainBtn=btn("#222","#333","ti-player-play","#fff","Hors ligne",false,"");
+        } else if(joinStatus==="joining"){
+          mainBtn='<button disabled style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;padding:10px 0;border-radius:8px;font-size:13px;font-family:inherit;cursor:not-allowed;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:500;background:#0d2a1a;border:1px solid #1d9e75;color:#5dcaa5"><i class="ti ti-loader spin" style="font-size:16px"></i>Connexion en cours...</button>';
+        } else if(joinStatus==="error"){
+          mainBtn='<button disabled style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;padding:10px 0;border-radius:8px;font-size:13px;font-family:inherit;cursor:not-allowed;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:500;background:#2a1515;border:1px solid #7a2020;color:#e05555"><i class="ti ti-alert-circle" style="font-size:16px"></i>Erreur de connexion</button>';
+        } else if(muted&&isActive){
+          const rc=myColor||{main:"#ba7517",border:"#ba7517"};
+          mainBtn=btn(rc.main,rc.border,"ti-player-play","#fff","Reprendre",true,"toggleMute('"+id+"')");
+        } else if(isActive&&myColor&&!muted){
+          mainBtn=btn(myColor.main,myColor.border,"ti-player-pause","#fff","Mettre en pause",true,"toggleMute('"+id+"')");
+        } else if(playingStreams.length===0){
+          mainBtn=btn("#2a2a2a","#333","ti-player-play","#666","Pas de diffusion",false,"");
+        } else {
+          mainBtn=playingStreams.map(function(sid){
+            const c=getStreamColor(sid);
+            return btn(c.bg,c.border,"ti-player-play",c.text,"Rejoindre",true,piName?"joinStream('"+id+"','"+piName+"','"+sid+"')":"joinStream('"+id+"',null,'"+sid+"')");
+          }).join('<div style="height:6px"></div>');
+        }
+
+        const showLeave=isActive&&!muted&&!isOnDefaultStream;
+        const leaveBtn=showLeave?'<div style="height:6px"></div>'+btn("#2a1515","#7a2020","ti-x","#e05555","Quitter la diffusion",true,leaveAction,true):"";
+
+        const piOutputOptions=PI_AUDIO_OUTPUTS[piName];
+        let audioCtrl="";
+        if(piOutputOptions){
+          if(changingOutput[piName]){
+            audioCtrl='<div style="margin-top:8px;padding:6px 8px;background:#0d2a1a;border:1px solid #1d9e75;border-radius:7px;font-size:11px;color:#5dcaa5;display:flex;align-items:center;gap:5px"><i class="ti ti-loader spin" style="font-size:12px"></i>Chgt sortie en cours...</div>';
+          } else if(pendingOutput[piName]){
+            const po=pendingOutput[piName];
+            const lbl={"bt":"Bluetooth","jack":"Jack","hdmi":"HDMI"};
+            audioCtrl='<div style="margin-top:8px;display:flex;gap:4px;align-items:center">'
+              +'<div style="flex:1;padding:5px 8px;background:#2a1a08;border:1px solid #ba7517;border-radius:7px;font-size:11px;color:#ef9f27">\u2192 '+(lbl[po]||po)+' ?</div>'
+              +'<button onclick="confirmOutput(\''+piName+'\',\''+po+'\',\''+id+'\')" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;padding:5px 12px;background:#1d9e75;border:1px solid #1d9e75;border-radius:7px;font-size:11px;color:#fff;cursor:pointer;font-family:inherit;font-weight:500">OK</button>'
+              +'<button onclick="cancelOutput(\''+piName+'\')" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;padding:5px 10px;background:#2a2a2a;border:1px solid #444;border-radius:7px;font-size:11px;color:#888;cursor:pointer;font-family:inherit">\u2715</button>'
+              +'</div>';
+          } else {
+            audioCtrl='<div style="margin-top:8px"><select onchange="selectOutput(\''+piName+'\',this.value)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;width:100%;background:#111;border:1px solid #2a2a2a;border-radius:7px;color:#777;padding:5px 8px;font-size:11px;cursor:pointer;font-family:inherit">'
+              +piOutputOptions.map(function(o){return'<option value="'+o+'" '+(piAudioOutputs[piName]===o?"selected":"")+'>'+( PI_AUDIO_LABELS[o]||o)+'</option>';}).join("")
+              +'</select></div>';
+          }
+        }
+
+        const razBtn=canReset?'<button data-raz="'+id+'" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:#1a1a1a;border:1px solid #333;border-radius:5px;color:#888;cursor:pointer;font-size:10px;padding:2px 6px">RAZ</button>':'';
+        const decBtn='<button onclick="adjustLatency(\''+id+'\',\''+GROUPS[id].type+'\','+-STEP_MS+')" '+(canDec?'':'disabled')+' style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:'+(canDec?'#ccc':'#333')+';cursor:'+(canDec?'pointer':'not-allowed')+';font-size:18px;padding:0 4px;line-height:1"><i class=\"ti ti-clock-minus\" style=\"font-size:15px\"></i></button>';
+        const incBtn='<button onclick="adjustLatency(\''+id+'\',\''+GROUPS[id].type+'\','+STEP_MS+')" '+(canInc?'':'disabled')+' style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:transparent;border:none;color:'+(canInc?'#ccc':'#333')+';cursor:'+(canInc?'pointer':'not-allowed')+';font-size:18px;padding:0 4px;line-height:1"><i class=\"ti ti-clock-plus\" style=\"font-size:15px\"></i></button>';
+        const latencyControl='<div style="margin-top:8px"><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:#111;border:1px solid #2a2a2a;border-radius:8px">'+decBtn+'<div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;color:'+latencyColor+';font-weight:500;min-width:55px;text-align:center">'+latencyStr+'</span>'+razBtn+'</div>'+incBtn+'</div></div>';
+
+        const rb=rebootState[id];
+        const rebootIcon=rb==='done'?'ti-check':rb==='rebooting'?'ti-loader spin':'ti-refresh';
+        const rebootColor=rb==='done'?'#5dcaa5':rb==='rebooting'?'#ef9f27':'#555';
+        const rebootBtn=effectiveOnline!==false?'<button onclick="rebootDevice(\''+id+'\')" title="Redémarrer" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:none;border:none;cursor:'+(rb==='rebooting'?'not-allowed':'pointer')+';padding:2px 4px;color:'+rebootColor+'"><i class="ti '+rebootIcon+'" style="font-size:15px"></i></button>':'';
+        return '<div style="background:#1a1a1a;border:'+cardBorder+';border-radius:12px;padding:.6rem;opacity:'+opacity+';overflow:hidden;min-width:0">'
+          +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">'
+          +'<div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:#fff">'
+          +(GROUP_IMAGE[id]?'<img src="'+GROUP_IMAGE[id]+'" style="width:38px;height:38px;object-fit:contain;border-radius:4px;background:#111;padding:2px">':('<i class="ti '+GROUPS[id].icon+'" style="font-size:18px;color:'+iconColor+'"></i>'))+GROUPS[id].label+barsHtml+'</div>'
+          +'<div style="display:flex;align-items:center;gap:6px">'+(GROUP_HUE_ROOM[id]?(function(){
+  const hOn=hueActive[id];
+  const roomName=getRoomNameForGroup(id);
+  const roomEnabled=hueConfig&&hueConfig.rooms&&hueConfig.rooms[roomName]?hueConfig.rooms[roomName].enabled!==false:true;
+  const canHue=isActive&&!muted&&roomEnabled;
+  const curScene=hueCurrentScene[id]||'';
+  const imgFile=curScene&&SCENE_IMAGE_MAP[curScene]?SCENE_IMAGE_MAP[curScene]:'';
+  const sceneThumb=hOn&&curScene
+    ?'<div style="position:relative;width:80px;height:38px;border-radius:7px;overflow:hidden;border:1px solid '+(myColor?myColor.border:'#f5a623')+';flex-shrink:0;cursor:pointer" onclick="deactivateHue(\''+id+'\')">'+
+      (imgFile?'<img src="/hue-scenes/'+imgFile+'" style="width:100%;height:100%;object-fit:cover">':'<div style="width:100%;height:100%;background:#2a1a00"></div>')+
+      '<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.6),transparent)"></div>'+
+      '<span style="position:absolute;bottom:2px;left:4px;font-size:9px;font-weight:600;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.8);white-space:nowrap;overflow:hidden;max-width:70px;text-overflow:ellipsis">'+curScene+'</span>'+
+      '</div>'
+    :'<button onclick="'+(hOn?'deactivateHue':'activateHue')+'(\''+id+'\')" title="'+(hOn?'Désactiver lumières':'Activer lumières Hue')+'" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:'+(hOn?'rgba(245,166,35,0.15)':'none')+';border:'+(hOn?'1px solid #f5a623':'none')+';border-radius:6px;cursor:'+(canHue?'pointer':'not-allowed')+';padding:3px 5px;color:'+(hOn?'#f5a623':(canHue?'#888':'#333'))+';display:flex;align-items:center;opacity:'+(canHue||hOn?1:0.4)+'"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hueGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ff0080"/><stop offset="25%" style="stop-color:#ff8000"/><stop offset="50%" style="stop-color:#ffff00"/><stop offset="75%" style="stop-color:#00ff80"/><stop offset="100%" style="stop-color:#0080ff"/></linearGradient></defs><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.22-1.21 4.16-3 5.2V17a1 1 0 0 1-1 1H10a1 1 0 0 1-1-1v-2.8C7.21 13.16 6 11.22 6 9a6 6 0 0 1 6-6z" stroke="url(#hueGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+  return sceneThumb;
+}()):'')+rebootBtn+'<div title="'+badgeText+'" style="width:10px;height:10px;border-radius:50%;background:'+(effectiveOnline?'#1d9e75':'#444')+';flex-shrink:0;box-shadow:0 0 '+(effectiveOnline?'4px #1d9e75':'none')+'"></div></div>'
+          +'</div>'
+          +nowPlayingHtml+mainBtn+leaveBtn+audioCtrl
+          +(GROUP_OWNTONE[id]
+            ?'<div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:6px;padding:4px 0">'              +'<i class="ti ti-volume" style="font-size:15px;color:#555"></i>'              +'<button onclick="setOwntoneVolume(\''+id+'\',-1)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:'+((linkedStream&&getStreamGroupMembers(linkedStream).indexOf(id)>=0)?'rgba(239,159,39,0.15)':'#111')+';border:1px solid '+((linkedStream&&getStreamGroupMembers(linkedStream).indexOf(id)>=0)?'#c87000':'#2a2a2a')+';border-radius:8px;color:'+((linkedStream&&getStreamGroupMembers(linkedStream).indexOf(id)>=0)?'#ef9f27':'#ccc')+';cursor:pointer;flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:inherit;font-weight:300">−</button>'              +'<span style="font-size:14px;color:#ccc;min-width:44px;text-align:center;font-weight:500">'+(owntoneVolumes[id]!==undefined?owntoneVolumes[id]:'—')+'%</span>'              +'<button onclick="setOwntoneVolume(\''+id+'\',1)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:'+((linkedStream&&getStreamGroupMembers(linkedStream).indexOf(id)>=0)?'rgba(239,159,39,0.15)':'#111')+';border:1px solid '+((linkedStream&&getStreamGroupMembers(linkedStream).indexOf(id)>=0)?'#c87000':'#2a2a2a')+';border-radius:8px;color:'+((linkedStream&&getStreamGroupMembers(linkedStream).indexOf(id)>=0)?'#ef9f27':'#ccc')+';cursor:pointer;flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:inherit;font-weight:300">+</button>'              +'</div>'            :'')
+          +(GROUP_NS300[id]
+            ?'<div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:6px;padding:4px 0">'              +'<i class="ti ti-volume" style="font-size:15px;color:#555"></i>'              +'<button onclick="setNs300Volume(\''+id+'\',-1)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:'+((linkedStream&&getStreamGroupMembers(linkedStream).indexOf(id)>=0)?'rgba(239,159,39,0.15)':'#111')+';border:1px solid '+((linkedStream&&getStreamGroupMembers(linkedStream).indexOf(id)>=0)?'#c87000':'#2a2a2a')+';border-radius:8px;color:'+((linkedStream&&getStreamGroupMembers(linkedStream).indexOf(id)>=0)?'#ef9f27':'#ccc')+';cursor:pointer;flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:inherit;font-weight:300">−</button>'              +'<span style="font-size:14px;color:#ccc;min-width:44px;text-align:center;font-weight:500">'+(ns300Volumes[id]!==undefined?ns300Volumes[id]:'—')+'%</span>'              +'<button onclick="setNs300Volume(\''+id+'\',1)" style="-webkit-appearance:none;-moz-appearance:none;appearance:none;background:'+((linkedStream&&getStreamGroupMembers(linkedStream).indexOf(id)>=0)?'rgba(239,159,39,0.15)':'#111')+';border:1px solid '+((linkedStream&&getStreamGroupMembers(linkedStream).indexOf(id)>=0)?'#c87000':'#2a2a2a')+';border-radius:8px;color:'+((linkedStream&&getStreamGroupMembers(linkedStream).indexOf(id)>=0)?'#ef9f27':'#ccc')+';cursor:pointer;flex:1;height:42px;display:flex;align-items:center;justify-content:center;font-size:24px;font-family:inherit;font-weight:300">+</button>'              +'</div>'            :'')          +latencyControl
+          +'</div>';
+  });
+  document.getElementById("grid-sony").innerHTML=allHtml.join("");
+  var gl = document.getElementById("grid-loading"); if(gl) gl.style.display="none";
+}
+
+function selectOutput(pi,output){
+  pendingOutput[pi]=output;renderGroups();
+  setTimeout(function(){if(pendingOutput[pi]===output){delete pendingOutput[pi];renderGroups();}},5000);
+}
+function confirmOutput(pi,output,groupId){
+  delete pendingOutput[pi];changingOutput[pi]=true;renderGroups();
+  fetch("/set-output?pi="+pi+"&output="+output).then(function(){
+    piAudioOutputs[pi]=output;return new Promise(function(r){setTimeout(r,6000);});
+  }).then(function(){delete changingOutput[pi];renderGroups();})
+  .catch(function(){delete changingOutput[pi];renderGroups();});
+}
+function cancelOutput(pi){delete pendingOutput[pi];renderGroups();}
+async function resetLatency(groupId){
+  const mac=GROUP_MAC[groupId];if(!mac)return;
+  try{await rpc("Client.SetLatency",{id:mac,latency:0});clientLatencies[mac]=0;renderGroups();}catch(e){}
+}
+async function adjustLatency(groupId,type,deltaMs){
+  const mac=GROUP_MAC[groupId];if(!mac)return;
+  const limits=getLimits(type);const current=clientLatencies[mac]||0;
+  const newLatency=Math.max(limits.min,Math.min(limits.max,current+deltaMs));
+  try{await rpc("Client.SetLatency",{id:mac,latency:newLatency});clientLatencies[mac]=newLatency;renderGroups();}catch(e){}
+}
+async function joinStream(groupId,piName,streamId){
+  try{await rpc("Group.SetStream",{id:groupId,stream_id:streamId});if(state[groupId])state[groupId].stream=streamId;}catch(e){}
+  if(GROUP_NS300[groupId]){
+    joiningState[groupId]="joining";renderGroups();
+    fetch("/ns300-control?group="+groupId+"&action=play").catch(()=>{});
+    const ok=await pollUntilActive(groupId,JOIN_TIMEOUT);
+    if(ok){delete joiningState[groupId];await refresh();}
+    else{joiningState[groupId]="error";renderGroups();setTimeout(function(){delete joiningState[groupId];renderGroups();},2000);}
+  } else if(piName){
+    joiningState[groupId]="joining";renderGroups();
+    snapclientControl(piName,"join",streamId);
+    const ok=await pollUntilActive(groupId,JOIN_TIMEOUT);
+    if(ok){delete joiningState[groupId];await refresh();}
+    else{joiningState[groupId]="error";renderGroups();setTimeout(function(){delete joiningState[groupId];renderGroups();},2000);}
+  } else {renderGroups();}
+}
+async function leaveStream(groupId,piName){
+  try{
+    if(GROUP_NS300[groupId]){
+      fetch("/ns300-control?group="+groupId+"&action=stop").catch(()=>{});
+    } else if(piName){
+      snapclientControl(piName,"leave","");
+    }
+    const ds=GROUP_DEFAULT_STREAM[groupId];
+    if(ds){await rpc("Group.SetStream",{id:groupId,stream_id:ds});if(state[groupId])state[groupId].stream=ds;}
+    if(state[groupId]&&state[groupId].muted){await rpc("Group.SetMute",{id:groupId,mute:false});state[groupId].muted=false;}
+    renderGroups();setTimeout(refresh,3000);
+  }catch(e){}
+}
+async function resetStream(streamId){
+  const icon=document.getElementById('rst-'+streamId);
+  if(icon)icon.className='ti ti-loader spin';
+  await fetch('/stop-stream?stream='+streamId).catch(()=>{});
+  setTimeout(()=>{
+    if(icon)icon.className='ti ti-refresh';
+  },4000);
+}
+async function rebootLXC03(){
+  const btn=document.getElementById('reboot-lxc03-btn');
+  const icon=document.getElementById('reboot-lxc03-icon');
+  const txt=document.getElementById('reboot-lxc03-txt');
+  if(btn.disabled)return;
+  btn.disabled=true;
+  btn.style.color='#ef9f27';
+  btn.style.borderColor='#ef9f27';
+  icon.className='ti ti-loader spin';
+  txt.textContent='Redémarrage...';
+  await fetch('/reboot-container?lxc=210').catch(()=>{});
+  // Attendre que le snapserver soit de nouveau joignable
+  const start=Date.now();
+  const poll=setInterval(async()=>{
+    if(Date.now()-start>120000){
+      clearInterval(poll);
+      btn.disabled=false;
+      btn.style.color='#e05555';
+      icon.className='ti ti-alert-circle';
+      txt.textContent='Timeout';
+      setTimeout(()=>{btn.style.color='#555';btn.style.borderColor='#2a2a2a';icon.className='ti ti-refresh';txt.textContent='LXC03';},3000);
+      return;
+    }
+    try{
+      await rpc('Server.GetStatus');
+      clearInterval(poll);
+      btn.disabled=false;
+      btn.style.color='#5dcaa5';
+      btn.style.borderColor='#5dcaa5';
+      icon.className='ti ti-check';
+      txt.textContent='OK';
+      setTimeout(()=>{btn.style.color='#555';btn.style.borderColor='#2a2a2a';icon.className='ti ti-refresh';txt.textContent='LXC03';},3000);
+    }catch(e){}
+  },3000);
+}
+async function rebootDevice(groupId){
+  if(rebootState[groupId]==='rebooting')return;
+  rebootState[groupId]='rebooting';
+  renderGroups();
+  const lxc=GROUP_LXC[groupId];
+  const pi=GROUP_PI[groupId];
+  if(lxc){
+    await fetch(`/reboot-container?lxc=${lxc}`).catch(()=>{});
+  } else if(pi){
+    await fetch(`/snapclient-control?pi=${pi}&action=reboot`).catch(()=>{});
+  }
+  // Attendre que le client disparaisse puis réapparaisse dans Snapcast
+  const mac=GROUP_MAC[groupId];
+  const startTime=Date.now();
+  const timeout=120000;
+  let disappeared=false;
+  const poll=setInterval(async()=>{
+    if(Date.now()-startTime>timeout){clearInterval(poll);rebootState[groupId]='timeout';renderGroups();return;}
+    try{
+      const data=await rpc('Server.GetStatus');
+      const group=data.server.groups.find(g=>g.id===groupId);
+      const connected=group&&group.clients.some(c=>c.connected&&c.id===mac);
+      if(!disappeared&&!connected)disappeared=true;
+      if(disappeared&&connected){
+        clearInterval(poll);
+        rebootState[groupId]='done';
+        renderGroups();
+        setTimeout(()=>{delete rebootState[groupId];renderGroups();},3000);
+      }
+    }catch(e){}
+  },3000);
+}
+async function toggleMute(groupId){
+  const muted=!(state[groupId]&&state[groupId].muted);
+  try{await rpc("Group.SetMute",{id:groupId,mute:muted});if(state[groupId])state[groupId].muted=muted;renderGroups();}catch(e){}
+}
+document.addEventListener('click',function(e){
+  const b=e.target.closest('[data-raz]');
+  if(b)resetLatency(b.getAttribute('data-raz'));
+});
+
+// Auto-join : assigne les enceintes aux streams actifs
+function autoJoinStreams(){
+  Object.keys(GROUP_DEFAULT_STREAM).forEach(function(groupId){
+    const defaultStream = GROUP_DEFAULT_STREAM[groupId];
+    if(!STREAM_GROUPS.includes(defaultStream) && !playingStreams.includes(defaultStream)) return;
+    const s = state[groupId];
+    if(!s) return;
+    // Ne pas agir si muted (pause manuelle)
+    if(s.muted) return;
+    // Ne pas agir si déjà sur ce stream
+    if(s.stream === defaultStream) return;
+    // Ne pas agir si sur un autre stream actif (choix intentionnel)
+    if(playingStreams.includes(s.stream)) return;
+    // Rejoindre automatiquement
+    const piName = GROUP_PI[groupId];
+    joinStream(groupId, piName||null, defaultStream);
+  });
+}
+
+function toggleStyleDropdown(streamId){
+  var existing=document.getElementById('global-style-dd');
+  if(existing&&existing.dataset.stream===streamId){existing.remove();return;}
+  if(existing)existing.remove();
+  var badge=document.getElementById('style-badge-'+streamId);
+  if(!badge)return;
+  var rect=badge.getBoundingClientRect();
+  var npData=nowPlaying[streamId];
+  var ovrKey=npData&&npData.track&&npData.artist?(npData.artist+'|||'+npData.track).toLowerCase():'';
+  var hasOvr=ovrKey&&styleOverrides[ovrKey];
+  var streamStyle=(nowPlayingFeatures[streamId]||{}).style||'defaut';
+  var SL={'energique':'\u26a1 \u00c9nergique','dansant':'\ud83d\udc83 Dansant','calme':'\ud83c\udf19 Calme','acoustique':'\ud83c\udfb8 Acoustique','festif':'\ud83c\udf89 Festif','melancolique':'\ud83c\udf27 M\u00e9lancolique','instrumental':'\ud83c\udfbc Instrumental','defaut':'\ud83c\udfb5 D\u00e9faut'};
+  var SOPTS=['energique','dansant','calme','acoustique','festif','melancolique','instrumental','defaut'];
+  var dd=document.createElement('div');
+  dd.id='global-style-dd';
+  dd.dataset.stream=streamId;
+  dd.style.cssText='position:fixed;z-index:9999;background:#1e1e1e;border:1px solid #333;border-radius:8px;padding:4px;min-width:170px;box-shadow:0 4px 16px rgba(0,0,0,0.8)';
+  var html='';
+  SOPTS.forEach(function(st){
+    var isAct=streamStyle===st;
+    var stOvr=ovrKey&&styleOverrides[ovrKey]===st;
+    var bg=isAct?'rgba(255,255,255,0.07)':'transparent';
+    var col=isAct?'#5dcaa5':'#aaa';
+    html+='<div data-st="'+st+'" data-sid="'+streamId+'" class="sdd-item" style="cursor:pointer;padding:5px 10px;border-radius:5px;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:'+col+';background:'+bg+'">';
+    html+='<span>'+(SL[st]||st)+'</span>';
+    if(stOvr)html+='<span style="font-size:10px;opacity:0.6">\u270f</span>';
+    html+='</div>';
+  });
+  if(hasOvr){
+    html+='<div style="border-top:1px solid #333;margin:3px 0 0;padding-top:3px">';
+    html+='<div data-st="remove" data-sid="'+streamId+'" class="sdd-item" style="cursor:pointer;padding:4px 10px;border-radius:5px;font-size:11px;color:#f5a623">\u21a9 Supprimer l\'override</div>';
+    html+='</div>';
+  }
+  dd.innerHTML=html;
+  dd.querySelectorAll('.sdd-item').forEach(function(el){
+    el.addEventListener('mouseenter',function(){el.style.background='rgba(255,255,255,0.05)';});
+    el.addEventListener('mouseleave',function(){el.style.background=el.dataset.st===streamStyle?'rgba(255,255,255,0.07)':'transparent';});
+    el.addEventListener('click',function(e){e.stopPropagation();applyStyleOverride(el.dataset.sid,el.dataset.st);});
+  });
+  document.body.appendChild(dd);
+  var top=rect.bottom+window.scrollY+4;
+  var left=rect.left+window.scrollX;
+  if(left+180>window.innerWidth)left=window.innerWidth-185;
+  dd.style.top=top+'px';
+  dd.style.left=left+'px';
+  setTimeout(function(){
+    document.addEventListener('click',function closeDD(e){
+      if(!e.target.closest('#global-style-dd')&&!e.target.closest('[id^="style-badge-"]')){
+        var el=document.getElementById('global-style-dd');
+        if(el)el.remove();
+        document.removeEventListener('click',closeDD);
+      }
+    });
+  },10);
+}
+async function applyStyleOverride(streamId,style){
+  var dd=document.getElementById('global-style-dd');
+  if(dd)dd.remove();
+  var npData=nowPlaying[streamId];
+  if(!npData||!npData.track||!npData.artist)return;
+
+  // Feedback immédiat : appliquer le style localement avant la réponse serveur
+  var effectiveStyle = style==='remove' ? ((nowPlayingFeatures[streamId]||{})._originalStyle||'defaut') : style;
+  if(!nowPlayingFeatures[streamId])nowPlayingFeatures[streamId]={};
+  if(style==='remove'){
+    nowPlayingFeatures[streamId].style = nowPlayingFeatures[streamId]._originalStyle||'defaut';
+    nowPlayingFeatures[streamId].overridden=false;
+  } else {
+    if(!nowPlayingFeatures[streamId]._originalStyle)
+      nowPlayingFeatures[streamId]._originalStyle=nowPlayingFeatures[streamId].style||'defaut';
+    nowPlayingFeatures[streamId].style=style;
+    nowPlayingFeatures[streamId].overridden=true;
+  }
+  if(typeof lastStreams!=='undefined')renderStreams(lastStreams);
+
+  // Déclencher scénario Hue immédiatement
+  if(Object.values(hueActive).some(function(v){return v;})){
+    // Forcer hueLastStyle à vide pour que hueAutoUpdate déclenche bien le changement
+    Object.keys(hueLastStyle).forEach(function(gid){
+      if(hueLastStyle[gid]===effectiveStyle) hueLastStyle[gid]='';
+    });
+    hueAutoUpdate();
+  }
+
+  try{
+    await fetch('/style-overrides',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({artist:npData.artist,track:npData.track,style:style})});
+    await fetchStyleOverrides();
+  }catch(e){console.error('applyStyleOverride',e);}
+}
+fetchHueConfig();
+fetchStyleOverrides();
+refresh().then(function(){fetchNowPlayingFeatures().then(hueAutoUpdate);});
+setInterval(()=>{
+  refresh();
+  if(Object.values(hueActive).some(v=>v)) fetchNowPlayingFeatures().then(hueAutoUpdate);
+},10000);
+fetchSpotifyStatus();
+
+// Owntone chargé immédiatement
+fetchOwntoneVolumes().then(function(){renderGroups();});
+// NS300 chargé après 3s (SOAP peut être lent)
+setTimeout(async function(){
+  await fetchNs300Volumes();
+  renderGroups();
+  // Re-render streams bar pour mettre à jour le niveau moyen
+  if(typeof lastStreams!=="undefined") renderStreams(lastStreams);
+}, 3000);
+// Rafraîchissement périodique des volumes
+setInterval(async function(){
+  await fetchOwntoneVolumes();
+  await fetchNs300Volumes();
+  renderGroups();
+  // Re-render streams bar pour mettre à jour le niveau moyen
+  if(typeof lastStreams!=="undefined") renderStreams(lastStreams);
+}, 15000);
+</script>
+<script defer="defer" src="index_files/v833ccba57c9e4d2798f2e76cebdd09a11778172276447_ba0C_a-bo.htm" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;84b74fa937e142fdbe3654b5c7a436c8&quot;,&quot;r&quot;:1,&quot;server_timing&quot;:{&quot;name&quot;:{&quot;cfCacheStatus&quot;:true,&quot;cfEdge&quot;:true,&quot;cfExtPri&quot;:true,&quot;cfL4&quot;:true,&quot;cfOrigin&quot;:true,&quot;cfSpeedBrain&quot;:true},&quot;location_startswith&quot;:null}}" crossorigin="anonymous"></script>
+
+
+<script defer="defer" src="index_files/v4513226cdae34746b4dedf0b4dfa099e1781791509496_a-bo" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;84b74fa937e142fdbe3654b5c7a436c8&quot;,&quot;r&quot;:1,&quot;server_timing&quot;:{&quot;name&quot;:{&quot;cfCacheStatus&quot;:true,&quot;cfEdge&quot;:true,&quot;cfExtPri&quot;:true,&quot;cfL4&quot;:true,&quot;cfOrigin&quot;:true,&quot;cfSpeedBrain&quot;:true},&quot;location_startswith&quot;:null}}" crossorigin="anonymous"></script>
+</body></html>
