@@ -129,7 +129,6 @@ const GROUP_LXC={
   "49c944c2-e3da-c460-febb-203a0741e201":"208",
   "0cb6f6d4-de64-effa-d218-a2dbca2565bd":"213",
 };
-const GROUP_HIDE_OFFLINE=new Set(["1efe8146-e7b4-f934-ca31-a98a221f89d6","d5f5ba1d-27dc-4bb9-08dd-0f53ce33ce71","a7ee841b-51eb-5b67-6de1-fba2104f0cdf","4595c5db-7274-97ad-e8b6-bc997d6a2bd7"]);
 const GROUP_PI={
   "1efe8146-e7b4-f934-ca31-a98a221f89d6":"rpi-cuisine",
   "d5f5ba1d-27dc-4bb9-08dd-0f53ce33ce71":"rpi-salon",
@@ -786,8 +785,6 @@ function renderGroups(){
         const lxcId=GROUP_LXC[id];
         const containerOnline=lxcId&&containerStatus[lxcId]!==undefined?containerStatus[lxcId]:null;
         const effectiveOnline=piName!==undefined?piPingable:(containerOnline!==null?containerOnline:snapConnected);
-        const hideWhenOffline=GROUP_HIDE_OFFLINE.has(id);
-        if(hideWhenOffline&&!effectiveOnline&&effectiveOnline!==null) return '';
         const opacity=(!effectiveOnline&&effectiveOnline!==null)?0.35:1;
         const myColor=isActive?getStreamColor(s.stream):null;
         const latency=getClientLatency(id);
