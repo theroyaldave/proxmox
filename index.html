@@ -463,17 +463,29 @@ async function syncHueStateFromServer(){
   try{
     const r=await fetch('/hue-state?_='+Date.now());
     const serverState=await r.json();
-    Object.keys(serverState).forEach(function(gid){
+    let changed=false;
+    Object.keys(GROUP_HUE_ROOM).forEach(function(gid){
       const s=serverState[gid];
-      if(!s||!s.active)return;
-      if(!hueActive[gid]){
-        hueActive[gid]=true;
-        hueCurrentScene[gid]=s.currentScene||'';
-        hueLastStyle[gid]=s.lastStyle||'';
-        hueLastTrack[gid]='';
+      if(s&&s.active){
+        if(!hueActive[gid]){
+          hueActive[gid]=true;
+          hueCurrentScene[gid]=s.currentScene||'';
+          hueLastStyle[gid]=s.lastStyle||'';
+          hueLastTrack[gid]='';
+          changed=true;
+        }
+      } else {
+        if(hueActive[gid]){
+          hueActive[gid]=false;
+          delete hueCurrentScene[gid];
+          delete hueLastStyle[gid];
+          delete hueLastTrack[gid];
+          delete hueSnapshot[gid];
+          changed=true;
+        }
       }
     });
-    renderGroups();
+    if(changed){saveHueState();renderGroups();}
   }catch(e){}
 }
 async function snapclientControl(pi,action,stream){
